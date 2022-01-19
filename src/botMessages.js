@@ -29,8 +29,7 @@ module.exports = {
             driverStatus < 3 ? KB_BTNS.ABOUT_CAR : '',
             driverStatus < 3 ? KB_BTNS.ABOUT_DRIVER : ''
           ],
-          [driverStatus < 2 ? KB_BTNS.CAR_REFUEL_STAT : ''],
-          [driverStatus === 0 ? KB_BTNS.ATTACH : '']
+          [driverStatus < 2 ? KB_BTNS.CAR_REFUEL_STAT : '']
         ],
         one_time_keyboard: true,
         resize_keyboard: true

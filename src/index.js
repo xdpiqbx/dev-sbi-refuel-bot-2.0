@@ -4,10 +4,9 @@ const config = require('./config');
 
 const Bot = require('./bot/Bot');
 const bot = new Bot();
-/*
 
+const Driver = require('./entityСlasses/Driver');
 
-*/
 const fetch = (...args) =>
   import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
@@ -54,11 +53,13 @@ logStart();
 // стартую и рисую клавиатуру
 bot.start(async msg => {
   try {
-    const driver = await getDriverByChatId(msg.chat.id);
-
+    const driver = new Driver(await getDriverByChatId(msg.chat.id));
+    console.log(driver);
     if (!driver) {
       newVisitor(msg.chat.id, msg.from.first_name, msg.from.username);
     } else {
+      // const driverInst = new Driver(driver);
+      // console.log(driverInst);
       state.check.driverId = driver._id;
       state.driver._id = driver._id;
       state.driver.name = driver.name;
@@ -66,7 +67,14 @@ bot.start(async msg => {
       state.driver.carsIds = driver.carsIds;
       state.driver.tlg_chatId = driver.tlg_chatId;
       if (state.driver.tlg_chatId === msg.chat.id) {
-        start(msg.chat.id);
+        const cars = await getAllCarsModelNumber();
+        sortStringsFromObj(cars, 'model');
+        botMessages.startDialog(
+          bot.sendMessage.bind(bot),
+          msg.chat.id,
+          cars,
+          ACTION.CARS_FOR_REFUEL
+        );
       }
     }
   } catch (e) {
@@ -137,11 +145,6 @@ bot.message(async msg => {
       break;
     case KB_BTNS.MY_CARS: // Done
       myCars(chatId);
-      break;
-    case KB_BTNS.ATTACH:
-      state.driver.status === 0
-        ? attach(chatId)
-        : botMessages.accessDenied(bot.sendMessage.bind(bot), chatId);
       break;
   }
 });
@@ -360,17 +363,6 @@ bot.photo(async msg => {
   resultReport(msg.chat.id);
 });
 
-const start = async chatId => {
-  const cars = await getAllCarsModelNumber();
-  sortStringsFromObj(cars, 'model');
-  botMessages.startDialog(
-    bot.sendMessage.bind(bot),
-    chatId,
-    cars,
-    ACTION.CARS_FOR_REFUEL
-  );
-};
-
 const howManyLitres = (chatId, stateCar) => {
   botMessages.howMuchDoWeFill(
     bot.sendMessage.bind(bot),
@@ -532,8 +524,4 @@ const aboutDriver = async chatId => {
     drivers,
     ACTION.INFO_ABOUT_DRIVER
   );
-};
-
-const attach = chatId => {
-  console.log(KB_BTNS.ATTACH); // in process
 };

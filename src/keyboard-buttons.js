@@ -6,6 +6,5 @@ module.exports = {
   MY_CARS: 'Закріплені за мною автомобілі',
   ABOUT_CAR: 'Інфо по авто',
   CAR_REFUEL_STAT: 'Статистика заправок',
-  ABOUT_DRIVER: 'Інфо по водію',
-  ATTACH: 'Закріпити / Перезакріпити за авто'
+  ABOUT_DRIVER: 'Інфо по водію'
 };
