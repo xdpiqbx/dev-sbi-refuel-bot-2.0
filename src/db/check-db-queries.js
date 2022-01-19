@@ -9,12 +9,18 @@ module.exports = {
   getAllChecks: async () => {
     return await Check.find({});
   },
-  getChecksByCarId: async carId => {
+  getChecksByCarId: async (carId, year) => {
     // делать выборку чеков за последние 3 месяца
     // return await Check.find({ carId }).select('date litres driverId');
-    return await Check.find({ carId }).select('date');
+    return await Check.find({
+      carId,
+      date: {
+        $gte: `${year}`,
+        $lte: `${year + 1}`
+      }
+    }).select('date');
   },
-  getChecksByCarIdForSpecificMonth: async (carId, month) => {
+  getChecksByCarIdForSpecificMonth: async (carId, month, year) => {
     const startDate = new Date();
     const endDate = new Date();
 
@@ -26,7 +32,7 @@ module.exports = {
     startDate.setSeconds(0);
     startDate.setDate(firstDay);
     startDate.setMonth(month);
-    startDate.setFullYear(2021);
+    startDate.setFullYear(year);
 
     const lastDay = lastDayOfMonth(startDate).getDate();
 
@@ -35,12 +41,9 @@ module.exports = {
     endDate.setSeconds(59);
     endDate.setDate(lastDay);
     endDate.setMonth(month);
-    endDate.setFullYear(2021);
+    endDate.setFullYear(year);
 
     endDate.setMinutes(endDate.getMinutes() + utc_offset);
-
-    // console.log(startDate);
-    // console.log(endDate);
 
     return await Check.find({
       carId,

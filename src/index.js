@@ -4,12 +4,10 @@ const config = require('./config');
 
 const Bot = require('./bot/Bot');
 const bot = new Bot();
+/*
 
-// const TelegramBot = require('node-telegram-bot-api');
-// const bot = new TelegramBot(config.TOKEN, {
-//   polling: true
-// });
 
+*/
 const fetch = (...args) =>
   import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
@@ -226,8 +224,28 @@ bot.callbackQuery(async query => {
       break;
     case ACTION.CAR_STATISTIC:
       state.refuelStat.carId = dataFromQuery.id;
-      const checksByCarId = await getChecksByCarId(state.refuelStat.carId);
       const carForStat = await getCarByIdWithoutDriversIds(
+        state.refuelStat.carId
+      );
+
+      const years = [2021, 2022];
+
+      botMessages.getListOfYearsInline(
+        bot.sendMessage.bind(bot),
+        chatId,
+        years,
+        carForStat,
+        ACTION.GET_LIST_OF_YEARS
+      );
+      break;
+
+    case ACTION.GET_LIST_OF_YEARS:
+      const checksByCarId = await getChecksByCarId(
+        state.refuelStat.carId,
+        dataFromQuery.year
+      );
+
+      const carForStatRes = await getCarByIdWithoutDriversIds(
         state.refuelStat.carId
       );
 
@@ -254,7 +272,8 @@ bot.callbackQuery(async query => {
         bot.sendMessage.bind(bot),
         chatId,
         allUnicMonthses,
-        carForStat,
+        dataFromQuery.year,
+        carForStatRes,
         ACTION.GET_STATS_FOR_MONTH
       );
       break;
@@ -263,7 +282,8 @@ bot.callbackQuery(async query => {
       const checksByCarIdForSpecificMonth =
         await getChecksByCarIdForSpecificMonth(
           state.refuelStat.carId,
-          dataFromQuery.month
+          dataFromQuery.month,
+          dataFromQuery.year
         );
       const unicDates = [
         ...new Set(

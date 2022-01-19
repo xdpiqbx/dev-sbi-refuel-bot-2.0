@@ -35,13 +35,27 @@ module.exports = {
       ];
     });
   },
-  monthsesToInlineKeyboard: (monthses, action) => {
+  yearsToInlineKeyboard: (years, action) => {
+    return years.map(year => {
+      return [
+        {
+          text: year,
+          callback_data: JSON.stringify({
+            year,
+            action
+          })
+        }
+      ];
+    });
+  },
+  monthsesToInlineKeyboard: (monthses, year, action) => {
     return monthses.map(({ month, label }) => {
       return [
         {
           text: label,
           callback_data: JSON.stringify({
             month: month.toString(),
+            year,
             action
           })
         }

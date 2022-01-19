@@ -4,6 +4,7 @@ const {
   driversWithoutChatIdToInlineKeyboard,
   carsToInlineKeyboard,
   driversToInlineKeyboard,
+  yearsToInlineKeyboard,
   monthsesToInlineKeyboard
 } = require('./inline-keyboards');
 
@@ -80,10 +81,21 @@ module.exports = {
     };
     sendMessage(chatId, message, options);
   },
+  getListOfYearsInline: (sendMessage, chatId, years, carForStat, action) => {
+    const { model, number } = carForStat;
+    const message = `${model} - ${number} \n Оберіть рік`;
+    const options = {
+      reply_markup: {
+        inline_keyboard: yearsToInlineKeyboard(years, action)
+      }
+    };
+    sendMessage(chatId, message, options);
+  },
   getListOfMonthesInline: (
     sendMessage,
     chatId,
     monthses,
+    year,
     carForStat,
     action
   ) => {
@@ -91,7 +103,7 @@ module.exports = {
     const message = `${model} - ${number} \n Оберіть місяць`;
     const options = {
       reply_markup: {
-        inline_keyboard: monthsesToInlineKeyboard(monthses, action)
+        inline_keyboard: monthsesToInlineKeyboard(monthses, year, action)
       }
     };
     sendMessage(chatId, message, options);

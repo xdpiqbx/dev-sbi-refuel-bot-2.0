@@ -32,8 +32,8 @@ class Bot {
     this.bot.on('photo', callback);
   }
 
-  sendMessage(...args) {
-    this.bot.sendMessage(...args);
+  async sendMessage(...args) {
+    await this.bot.sendMessage(...args);
   }
 }
 
