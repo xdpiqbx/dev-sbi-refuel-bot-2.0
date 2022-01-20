@@ -35,6 +35,9 @@ class Bot {
   async sendMessage(...args) {
     await this.bot.sendMessage(...args);
   }
+  async sendPhoto(...args) {
+    await this.bot.sendPhoto(...args);
+  }
 }
 
 module.exports = Bot;

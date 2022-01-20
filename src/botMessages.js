@@ -5,7 +5,8 @@ const {
   carsToInlineKeyboard,
   driversToInlineKeyboard,
   yearsToInlineKeyboard,
-  monthsesToInlineKeyboard
+  monthsesToInlineKeyboard,
+  candidateAddReject
 } = require('./inline-keyboards');
 
 module.exports = {
@@ -37,33 +38,31 @@ module.exports = {
     };
     sendMessage(chatId, message, options);
   },
-  messageForNewVisitor: (sendMessage, chatId, firstName) => {
+  messageForNewVisitor: (sendMessage, candidate) => {
     const message = [
-      `Доброго дня ${firstName}`,
+      `Доброго дня ${candidate.first_name}`,
       `Я Вас поки не знаю.`,
       `<b>Уточнюю чи можу Вам надати доступ...</b>`
     ].join('\n');
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(chatId, message, options);
+    sendMessage(candidate.tlg_chatId, message, options);
   },
-  reportForCreatorAboutNewUser: (sendMessage, chatId, firstName, userName) => {
+  reportForCreatorAboutNewUser: (sendMessage, candidate, action) => {
     const message = [
       `У нас відвідувач =)`,
-      `Ім'я: <b>${firstName}</b>`,
-      `Ім'я користувача: <b>${userName}</b>`,
-      `Ідентифікатор чату: <b>${chatId}</b>`
+      `Ім'я: <b>${candidate.first_name}</b>`,
+      `Ім'я користувача: <b>${candidate.name}</b>`,
+      `Ідентифікатор чату: <b>${candidate.tlg_chatId}</b>`
     ].join('\n');
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(chatId, message, options).then(() => {
-      sendMessage(chatId, `Добавить?`, {
+    sendMessage(candidate.creatorChatId, message, options).then(() => {
+      sendMessage(candidate.creatorChatId, `Добавить?`, {
         reply_markup: {
-          keyboard: [[KB_BTNS.YES, KB_BTNS.NO]],
-          one_time_keyboard: true,
-          resize_keyboard: true
+          inline_keyboard: candidateAddReject(candidate.tlg_chatId, action)
         }
       });
     });

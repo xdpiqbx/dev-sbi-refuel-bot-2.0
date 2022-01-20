@@ -47,26 +47,20 @@ const {
 } = require('./db/check-db-queries');
 
 const { logStart, sortStringsFromObj } = require('./helper');
+const { newVisitor } = require('./library/userLib');
 
 logStart();
 
 // стартую и рисую клавиатуру
 bot.start(async msg => {
   try {
-    const driver = new Driver(await getDriverByChatId(msg.chat.id));
-    console.log(driver);
-    if (!driver) {
-      newVisitor(msg.chat.id, msg.from.first_name, msg.from.username);
+    const dbResponse = await getDriverByChatId(msg.chat.id);
+    if (!dbResponse) {
+      newVisitor(bot, msg.chat.id, msg.from.first_name, msg.from.username);
     } else {
-      // const driverInst = new Driver(driver);
-      // console.log(driverInst);
+      const driver = new Driver(dbResponse);
       state.check.driverId = driver._id;
-      state.driver._id = driver._id;
-      state.driver.name = driver.name;
-      state.driver.status = driver.status;
-      state.driver.carsIds = driver.carsIds;
-      state.driver.tlg_chatId = driver.tlg_chatId;
-      if (state.driver.tlg_chatId === msg.chat.id) {
+      if (driver.tlg_chatId === msg.chat.id) {
         const cars = await getAllCarsModelNumber();
         sortStringsFromObj(cars, 'model');
         botMessages.startDialog(
@@ -112,12 +106,6 @@ bot.admin(async msg => {
 bot.message(async msg => {
   const chatId = msg.chat.id;
   switch (msg.text) {
-    case KB_BTNS.YES:
-      addDriverToDb(chatId); // Done
-      break;
-    case KB_BTNS.NO:
-      candidatRejected(); // Done
-      break;
     case KB_BTNS.GIVE_OUT_FUEL:
       state.driver.status === 0
         ? giveOutFuel(chatId)
@@ -155,6 +143,15 @@ bot.callbackQuery(async query => {
   let car = {};
   let driver = {};
   switch (dataFromQuery.action) {
+    case ACTION.CANDIDATE_YES_NO:
+      console.log(dataFromQuery);
+      // case KB_BTNS.YES:
+      //   addDriverToDb(chatId); // Done
+      //   break;
+      // case KB_BTNS.NO:
+      //   candidatRejected(chatId); // Done
+      //   break;
+      break;
     case ACTION.CARS_FOR_REFUEL:
       state.giveOutOrRefuel = false;
 
@@ -438,20 +435,20 @@ const resultReport = async chatId => {
   state = JSON.parse(initialState);
 };
 
-const newVisitor = (chatId, firstName, userName) => {
-  state.candidateChatId = chatId;
-  botMessages.messageForNewVisitor(
-    bot.sendMessage.bind(bot),
-    chatId,
-    firstName
-  );
-  botMessages.reportForCreatorAboutNewUser(
-    bot.sendMessage.bind(bot),
-    state.creatorChatId,
-    firstName,
-    userName
-  );
-};
+// const newVisitor = (chatId, firstName, userName) => {
+//   state.candidateChatId = chatId;
+//   botMessages.messageForNewVisitor(
+//     bot.sendMessage.bind(bot),
+//     chatId,
+//     firstName
+//   );
+//   botMessages.reportForCreatorAboutNewUser(
+//     bot.sendMessage.bind(bot),
+//     state.creatorChatId,
+//     firstName,
+//     userName
+//   );
+// };
 
 const addDriverToDb = async chatId => {
   const driversWithoutChatId = await getAllDriversWithoutChatId();
@@ -463,8 +460,8 @@ const addDriverToDb = async chatId => {
   );
 };
 
-const candidatRejected = () => {
-  botMessages.newUserRejected(bot.sendMessage.bind(bot), state.candidateChatId);
+const candidatRejected = chatId => {
+  botMessages.newUserRejected(bot.sendMessage.bind(bot), chatId);
 };
 
 const myCars = async chatId => {

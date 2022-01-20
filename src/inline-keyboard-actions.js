@@ -6,5 +6,6 @@ module.exports = {
   INFO_ABOUT_DRIVER: 'iad',
   CAR_STATISTIC: 'cs',
   GET_LIST_OF_YEARS: 'loy',
-  GET_STATS_FOR_MONTH: 'gsfm'
+  GET_STATS_FOR_MONTH: 'gsfm',
+  CANDIDATE_YES_NO: 'cyn'
 };

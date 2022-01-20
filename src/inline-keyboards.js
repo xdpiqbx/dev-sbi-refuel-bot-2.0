@@ -5,6 +5,24 @@ const getCallbackData = (id, action) => {
   });
 };
 module.exports = {
+  candidateAddReject: (candidateChatId, action) => {
+    const decision = [
+      { text: 'Додати', val: true },
+      { text: 'Відмовити', val: false }
+    ];
+    return decision.map(resp => {
+      return [
+        {
+          text: resp.text,
+          callback_data: JSON.stringify({
+            val: resp.val,
+            id: candidateChatId,
+            action
+          })
+        }
+      ];
+    });
+  },
   carsToInlineKeyboard: (cars, action) => {
     return cars.map(({ _id, number, model }) => {
       return [
