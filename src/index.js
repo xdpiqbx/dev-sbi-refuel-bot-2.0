@@ -56,7 +56,12 @@ bot.start(async msg => {
   try {
     const dbResponse = await getDriverByChatId(msg.chat.id);
     if (!dbResponse) {
-      newVisitor(bot, msg.chat.id, msg.from.first_name, msg.from.username);
+      newVisitor(
+        bot.sendMessage.bind(bot),
+        msg.chat.id,
+        msg.from.first_name,
+        msg.from.username
+      );
     } else {
       const driver = new Driver(dbResponse);
       state.check.driverId = driver._id;
@@ -144,13 +149,12 @@ bot.callbackQuery(async query => {
   let driver = {};
   switch (dataFromQuery.action) {
     case ACTION.CANDIDATE_YES_NO:
-      console.log(dataFromQuery);
-      // case KB_BTNS.YES:
-      //   addDriverToDb(chatId); // Done
-      //   break;
-      // case KB_BTNS.NO:
-      //   candidatRejected(chatId); // Done
-      //   break;
+      bot.deleteMessage(query.message.chat.id, query.message.message_id);
+      if (!dataFromQuery.val) {
+        candidatRejected(dataFromQuery.id); // Done
+      } else {
+        addDriverToDb(chatId, dataFromQuery.id); // Done
+      }
       break;
     case ACTION.CARS_FOR_REFUEL:
       state.giveOutOrRefuel = false;
@@ -182,16 +186,18 @@ bot.callbackQuery(async query => {
       break;
     case ACTION.ADD_NEW_DRIVER_TO_DB:
       const { acknowledged, modifiedCount } = await setTlgChatIdToDriver(
-        dataFromQuery.id,
-        state.candidateChatId
+        dataFromQuery._id,
+        dataFromQuery.id //candidateChatId
       );
-
+      bot.deleteMessage(query.message.chat.id, query.message.message_id);
       if (acknowledged && modifiedCount === 1) {
-        const driver = await getDriverByIdWithoutCars(dataFromQuery.id);
+        const driver = new Driver(
+          await getDriverByIdWithoutCars(dataFromQuery._id)
+        );
         botMessages.reportDriverChatIdIsAddedToDb(
           bot.sendMessage.bind(bot),
-          state.creatorChatId,
-          state.candidateChatId,
+          driver.creatorChatId,
+          dataFromQuery.id,
           driver.name
         );
       } else {
@@ -450,11 +456,12 @@ const resultReport = async chatId => {
 //   );
 // };
 
-const addDriverToDb = async chatId => {
+const addDriverToDb = async (chatId, candidateChatId) => {
   const driversWithoutChatId = await getAllDriversWithoutChatId();
   botMessages.addOrNotNewUserToDb(
     bot.sendMessage.bind(bot),
     chatId,
+    candidateChatId,
     driversWithoutChatId,
     ACTION.ADD_NEW_DRIVER_TO_DB
   );

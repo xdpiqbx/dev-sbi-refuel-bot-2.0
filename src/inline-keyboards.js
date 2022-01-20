@@ -43,12 +43,16 @@ module.exports = {
       ];
     });
   },
-  driversWithoutChatIdToInlineKeyboard: (drivers, action) => {
+  driversWithoutChatIdToInlineKeyboard: (drivers, candidateChatId, action) => {
     return drivers.map(({ _id, name }) => {
       return [
         {
           text: name,
-          callback_data: getCallbackData(_id, action)
+          callback_data: JSON.stringify({
+            _id,
+            id: candidateChatId,
+            action
+          })
         }
       ];
     });

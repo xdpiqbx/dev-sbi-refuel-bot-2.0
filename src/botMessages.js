@@ -67,12 +67,19 @@ module.exports = {
       });
     });
   },
-  addOrNotNewUserToDb: (sendMessage, chatId, driversWithoutChatId, action) => {
+  addOrNotNewUserToDb: (
+    sendMessage,
+    chatId,
+    candidateChatId,
+    driversWithoutChatId,
+    action
+  ) => {
     const message = `Додати водія в базу?`;
     const options = {
       reply_markup: {
         inline_keyboard: driversWithoutChatIdToInlineKeyboard(
           driversWithoutChatId,
+          candidateChatId,
           action
         )
       }

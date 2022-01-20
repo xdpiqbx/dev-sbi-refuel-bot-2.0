@@ -1,5 +1,6 @@
 const { getAllCarsModelNumber } = require('../db/car-db-queries');
 const { getDriverByChatId } = require('../db/driver-db-queries');
+const Driver = require('../entityСlasses/Driver');
 
 const start = bot => {
   bot.start(async msg => {

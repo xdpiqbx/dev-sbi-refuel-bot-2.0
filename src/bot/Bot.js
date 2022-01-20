@@ -38,6 +38,9 @@ class Bot {
   async sendPhoto(...args) {
     await this.bot.sendPhoto(...args);
   }
+  async deleteMessage(...args) {
+    await this.bot.deleteMessage(...args);
+  }
 }
 
 module.exports = Bot;
