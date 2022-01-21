@@ -24,6 +24,7 @@ module.exports = {
     });
   },
   carsToInlineKeyboard: (cars, action) => {
+    console.log(action);
     return cars.map(({ _id, number, model }) => {
       return [
         {

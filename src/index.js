@@ -34,7 +34,8 @@ const {
   getAllCarsModelNumberGas,
   getAllCarsModelNumber,
   getInfoAboutCarWithDriversNames,
-  setCarGasolineResidue
+  setCarGasolineResidue,
+  setGiveOutOrRefuel
 } = require('./db/car-db-queries');
 
 const botMessages = require('./botMessages');
@@ -48,38 +49,40 @@ const {
 
 const { logStart, sortStringsFromObj } = require('./helper');
 const { newVisitor } = require('./library/userLib');
+const start = require('./botEvents/startBot');
 
 logStart();
 
 // стартую и рисую клавиатуру
-bot.start(async msg => {
-  try {
-    const dbResponse = await getDriverByChatId(msg.chat.id);
-    if (!dbResponse) {
-      newVisitor(
-        bot.sendMessage.bind(bot),
-        msg.chat.id,
-        msg.from.first_name,
-        msg.from.username
-      );
-    } else {
-      const driver = new Driver(dbResponse);
-      state.check.driverId = driver._id;
-      if (driver.tlg_chatId === msg.chat.id) {
-        const cars = await getAllCarsModelNumber();
-        sortStringsFromObj(cars, 'model');
-        botMessages.startDialog(
-          bot.sendMessage.bind(bot),
-          msg.chat.id,
-          cars,
-          ACTION.CARS_FOR_REFUEL
-        );
-      }
-    }
-  } catch (e) {
-    console.log(e);
-  }
-});
+start(bot);
+// bot.start(async msg => {
+//   try {
+//     const dbResponse = await getDriverByChatId(msg.chat.id);
+//     if (!dbResponse) {
+//       newVisitor(
+//         bot.sendMessage.bind(bot),
+//         msg.chat.id,
+//         msg.from.first_name,
+//         msg.from.username
+//       );
+//     } else {
+//       const driver = new Driver(dbResponse);
+//       state.check.driverId = driver._id;
+//       if (driver.tlg_chatId === msg.chat.id) {
+//         const cars = await getAllCarsModelNumber();
+//         sortStringsFromObj(cars, 'model');
+//         botMessages.startDialog(
+//           bot.sendMessage.bind(bot),
+//           msg.chat.id,
+//           cars,
+//           ACTION.CARS_FOR_REFUEL
+//         );
+//       }
+//     }
+//   } catch (e) {
+//     console.log(e);
+//   }
+// });
 
 bot.admin(async msg => {
   try {
@@ -149,26 +152,31 @@ bot.callbackQuery(async query => {
   let driver = {};
   switch (dataFromQuery.action) {
     case ACTION.CANDIDATE_YES_NO:
+      // Refactored
       bot.deleteMessage(query.message.chat.id, query.message.message_id);
       if (!dataFromQuery.val) {
-        candidatRejected(dataFromQuery.id); // Done
+        candidatRejected(dataFromQuery.id);
       } else {
-        addDriverToDb(chatId, dataFromQuery.id); // Done
+        addDriverToDb(chatId, dataFromQuery.id);
       }
       break;
     case ACTION.CARS_FOR_REFUEL:
-      state.giveOutOrRefuel = false;
-
+      // state.giveOutOrRefuel = false;
       state.check.date = new Date(query.message.date * 1000);
       car = await getCarByIdWithoutDriversIds(dataFromQuery.id);
-
+      await setGiveOutOrRefuel(car._id, false);
       state.check.carId = car._id;
       state.car._id = car._id;
       state.car.model = car.model;
       state.car.number = car.number;
       state.car.gasoline_residue = car.gasoline_residue;
 
-      howManyLitres(chatId, state.car);
+      botMessages.howMuchDoWeFill(
+        bot.sendMessage.bind(bot),
+        chatId,
+        state.car,
+        state.driver.status
+      );
       break;
     case ACTION.GIVE_OUT_FUEL:
       state.giveOutOrRefuel = true;
@@ -336,13 +344,19 @@ bot.callbackQuery(async query => {
 });
 // любое число от 0-999 (сюда я ловлю литры)
 bot.getNumberOfLiters(async msg => {
+  /*
+  add to driver....
+  currentAction: {
+    actionType: 'carRefuel',
+    giveOutOrRefuel: false
+  }  
+  */
   if (!state.car.model) {
     botMessages.offerToPressStart(bot.sendMessage.bind(bot), msg.chat.id);
   } else {
     const litres = parseInt(msg.text.trim());
     /*
       тут или сложение или вычитание ...
-      state.car.gasoline_residue = state.car.gasoline_residue - litres
     */
     if (state.giveOutOrRefuel) {
       state.car.gasoline_residue = state.car.gasoline_residue + litres;
@@ -366,14 +380,14 @@ bot.photo(async msg => {
   resultReport(msg.chat.id);
 });
 
-const howManyLitres = (chatId, stateCar) => {
-  botMessages.howMuchDoWeFill(
-    bot.sendMessage.bind(bot),
-    chatId,
-    stateCar,
-    state.driver.status
-  );
-};
+// const howManyLitres = (chatId, stateCar) => {
+//   botMessages.howMuchDoWeFill(
+//     bot.sendMessage.bind(bot),
+//     chatId,
+//     stateCar,
+//     state.driver.status
+//   );
+// };
 
 const litresReport = async chatId => {
   if (state.giveOutOrRefuel) {

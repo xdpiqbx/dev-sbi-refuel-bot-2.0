@@ -5,7 +5,7 @@ module.exports = {
     return await Car.find({}).select('model number gasoline_residue -_id');
   },
   getAllCarsModelNumber: async () => {
-    return await Car.find({}).select('model number');
+    return await Car.find({}).select('model number').sort('model');
   },
   getCarByIdWithoutDriversIds: async carId => {
     return await Car.findById({ _id: carId }).select('-driversIds');
@@ -15,5 +15,14 @@ module.exports = {
   },
   setCarGasolineResidue: async (carId, gasoline_residue) => {
     await Car.updateOne({ _id: carId }, { $set: { gasoline_residue } });
+  },
+  getGiveOutOrRefuel: async carId => {
+    return await Car.find({ giveOutOrRefuel });
+  },
+  setGiveOutOrRefuel: async (carId, giveOutOrRefuel) => {
+    return await Car.findOneAndUpdate(
+      { _id: carId },
+      { $set: { giveOutOrRefuel } }
+    );
   }
 };

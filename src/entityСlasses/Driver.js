@@ -5,7 +5,6 @@ class Driver {
   carsIds = [];
   tlg_chatId = null;
   candidateChatId = null;
-  giveOutOrRefue = false;
   creatorChatId = 938358368;
 
   constructor(driver) {
@@ -15,7 +14,6 @@ class Driver {
     this.carsIds = driver.carsIds;
     this.tlg_chatId = driver.tlg_chatId;
     this.candidateChatId = null;
-    this.giveOutOrRefue = false;
     this.creatorChatId = 938358368;
   }
 }

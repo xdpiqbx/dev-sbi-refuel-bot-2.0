@@ -19,7 +19,10 @@ const CarSchema = new Schema({
       type: mongoose.SchemaTypes.ObjectId,
       ref: 'driver'
     }
-  ]
+  ],
+  giveOutOrRefuel: {
+    type: Boolean
+  }
 });
 
 const Car = model('car', CarSchema);

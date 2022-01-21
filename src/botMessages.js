@@ -227,7 +227,7 @@ module.exports = {
         });
       })
       .then(() => {
-        sendMessage(chatId, `Чи інші функції`, {
+        sendMessage(chatId, `Чи інші функції ?`, {
           reply_markup: {
             keyboard: [[KB_BTNS.MY_CARS]],
             one_time_keyboard: true,
