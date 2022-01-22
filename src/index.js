@@ -354,7 +354,7 @@ bot.getNumberOfLiters(async msg => {
   const chatId = msg.chat.id;
   try {
     const carId = await getTempCarId(chatId);
-    if (!carId._id) {
+    if (!carId.temp_carId) {
       botMessages.offerToPressStart(bot.sendMessage.bind(bot), chatId);
     } else {
       const car = await getCarByIdWithoutDriversIds(carId.temp_carId);
