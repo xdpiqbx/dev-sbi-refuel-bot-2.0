@@ -21,7 +21,8 @@ const CarSchema = new Schema({
     }
   ],
   giveOutOrRefuel: {
-    type: Boolean
+    type: Boolean,
+    default: false
   }
 });
 

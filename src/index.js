@@ -345,11 +345,7 @@ bot.callbackQuery(async query => {
 // любое число от 0-999 (сюда я ловлю литры)
 bot.getNumberOfLiters(async msg => {
   /*
-  add to driver....
-  currentAction: {
-    actionType: 'carRefuel',
-    giveOutOrRefuel: false
-  }  
+  делаю временный чек в моделе водителя !!!
   */
   if (!state.car.model) {
     botMessages.offerToPressStart(bot.sendMessage.bind(bot), msg.chat.id);
