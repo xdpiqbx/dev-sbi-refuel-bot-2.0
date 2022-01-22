@@ -2,7 +2,6 @@ const Driver = require('../entityСlasses/Driver');
 const botMessages = require('../botMessages');
 const { getAllCarsModelNumber } = require('../db/car-db-queries');
 const { getDriverByChatId } = require('../db/driver-db-queries');
-const { sortStringsFromObj } = require('../helper');
 const { newVisitor } = require('../library/userLib');
 const ACTION = require('../inline-keyboard-actions');
 

@@ -26,7 +26,11 @@ const {
   getAllDriversWithoutChatId,
   getDriverByIdWithCars,
   getDriverByIdWithoutCars,
-  setTlgChatIdToDriver
+  setTlgChatIdToDriver,
+  getDriverStatusByChatId,
+  setTempCarIdForDriver,
+  getTempCarId,
+  setTempLitres
 } = require('./db/driver-db-queries');
 
 const {
@@ -35,7 +39,8 @@ const {
   getAllCarsModelNumber,
   getInfoAboutCarWithDriversNames,
   setCarGasolineResidue,
-  setGiveOutOrRefuel
+  setGiveOutOrRefuel,
+  getGiveOutOrRefuel
 } = require('./db/car-db-queries');
 
 const botMessages = require('./botMessages');
@@ -148,6 +153,7 @@ bot.message(async msg => {
 bot.callbackQuery(async query => {
   const dataFromQuery = JSON.parse(query.data);
   const chatId = query.message.chat.id;
+  const driverStatus = await getDriverStatusByChatId(chatId);
   let car = {};
   let driver = {};
   switch (dataFromQuery.action) {
@@ -161,22 +167,22 @@ bot.callbackQuery(async query => {
       }
       break;
     case ACTION.CARS_FOR_REFUEL:
-      // state.giveOutOrRefuel = false;
-      state.check.date = new Date(query.message.date * 1000);
-      car = await getCarByIdWithoutDriversIds(dataFromQuery.id);
-      await setGiveOutOrRefuel(car._id, false);
-      state.check.carId = car._id;
-      state.car._id = car._id;
-      state.car.model = car.model;
-      state.car.number = car.number;
-      state.car.gasoline_residue = car.gasoline_residue;
-
-      botMessages.howMuchDoWeFill(
-        bot.sendMessage.bind(bot),
-        chatId,
-        state.car,
-        state.driver.status
-      );
+      // Refactored
+      try {
+        const carForRefuel = await getCarByIdWithoutDriversIds(
+          dataFromQuery.id
+        );
+        await setGiveOutOrRefuel(carForRefuel._id, false); // giveOutOrRefuel = false;
+        await setTempCarIdForDriver(chatId, carForRefuel._id);
+        botMessages.howMuchDoWeFill(
+          bot.sendMessage.bind(bot),
+          chatId,
+          carForRefuel,
+          driverStatus
+        );
+      } catch (error) {
+        console.log(error);
+      }
       break;
     case ACTION.GIVE_OUT_FUEL:
       state.giveOutOrRefuel = true;
@@ -344,26 +350,36 @@ bot.callbackQuery(async query => {
 });
 // любое число от 0-999 (сюда я ловлю литры)
 bot.getNumberOfLiters(async msg => {
-  /*
-  делаю временный чек в моделе водителя !!!
-  */
-  if (!state.car.model) {
-    botMessages.offerToPressStart(bot.sendMessage.bind(bot), msg.chat.id);
-  } else {
-    const litres = parseInt(msg.text.trim());
-    /*
-      тут или сложение или вычитание ...
-    */
-    if (state.giveOutOrRefuel) {
-      state.car.gasoline_residue = state.car.gasoline_residue + litres;
+  // Refactored
+  const chatId = msg.chat.id;
+  try {
+    const carId = await getTempCarId(chatId);
+    if (!carId._id) {
+      botMessages.offerToPressStart(bot.sendMessage.bind(bot), chatId);
     } else {
-      state.car.gasoline_residue = state.car.gasoline_residue - litres;
+      const car = await getCarByIdWithoutDriversIds(carId.temp_carId);
+      const litres = parseInt(msg.text.trim());
+      let resLitres = 0;
+      if (car.giveOutOrRefuel) {
+        // give out talon
+        resLitres = car.gasoline_residue + litres;
+      } else {
+        // refuel
+        resLitres = car.gasoline_residue - litres;
+      }
+      await setCarGasolineResidue(car._id, resLitres);
+      await setTempLitres(chatId, litres);
+      litresReport(
+        chatId,
+        car,
+        resLitres,
+        litres,
+        await getDriverStatusByChatId(chatId),
+        car.giveOutOrRefuel
+      );
     }
-    state.check.litres = litres;
-
-    await setCarGasolineResidue(state.car._id, state.car.gasoline_residue);
-
-    litresReport(msg.chat.id);
+  } catch (error) {
+    console.log(error);
   }
 });
 
@@ -385,23 +401,32 @@ bot.photo(async msg => {
 //   );
 // };
 
-const litresReport = async chatId => {
-  if (state.giveOutOrRefuel) {
+const litresReport = async (
+  chatId,
+  car,
+  resLitres,
+  litres,
+  status,
+  giveOutOrRefuel
+) => {
+  if (giveOutOrRefuel) {
     botMessages.giveOutReport(
       bot.sendMessage.bind(bot),
       chatId,
-      state.car,
-      state.check.litres,
-      state.driver.status
+      car,
+      resLitres,
+      litres,
+      status
     );
-    await setCarGasolineResidue(state.car._id, state.car.gasoline_residue);
+    await setCarGasolineResidue(car._id, car.gasoline_residue);
   } else {
     botMessages.refuelReportAndAskForCheck(
       bot.sendMessage.bind(bot),
       chatId,
-      state.car,
-      state.check.litres,
-      state.driver.status
+      car,
+      resLitres,
+      litres,
+      status
     );
   }
 };

@@ -231,7 +231,6 @@ module.exports = {
           reply_markup: {
             keyboard: [[KB_BTNS.MY_CARS]],
             one_time_keyboard: true,
-            resize_keyboard: true,
             resize_keyboard: true
           }
         });
@@ -253,7 +252,14 @@ module.exports = {
     };
     sendMessage(chatId, message.join('\n'), options);
   },
-  refuelReportAndAskForCheck: (sendMessage, chatId, car, litres, status) => {
+  refuelReportAndAskForCheck: (
+    sendMessage,
+    chatId,
+    car,
+    resLitres,
+    litres,
+    status
+  ) => {
     const message = [
       `Ви заправили:`,
       `Авто: <b>[ ${car.model} ]</b>`,
@@ -261,9 +267,7 @@ module.exports = {
       `Заправлено на: <b>${litres}</b> літрів`
     ];
     if (status < 2) {
-      message.push(
-        `Залишилось талонами: <b>${car.gasoline_residue}</b> літрів`
-      );
+      message.push(`Залишилось талонами: <b>${resLitres}</b> літрів`);
     }
     message.push('\nЗбережено &#x1F4BE\n');
     message.push('&#x203C <b>Додайте якісне фото чека</b> &#x1F4F7');
@@ -274,7 +278,7 @@ module.exports = {
 
     sendMessage(chatId, message.join('\n'), options);
   },
-  giveOutReport: (sendMessage, chatId, car, litres, status) => {
+  giveOutReport: (sendMessage, chatId, car, resLitres, litres, status) => {
     const message = [
       `Паливо видано на авто:`,
       `Авто: <b>[ ${car.model} ]</b>`,
@@ -282,9 +286,7 @@ module.exports = {
       `Видано: <b>${litres}</b> літрів`
     ];
     if (status < 2) {
-      message.push(
-        `Залишилось талонами: <b>${car.gasoline_residue}</b> літрів`
-      );
+      message.push(`Залишилось талонами: <b>${resLitres}</b> літрів`);
     }
     const options = {
       parse_mode: 'HTML'

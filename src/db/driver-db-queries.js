@@ -24,5 +24,26 @@ module.exports = {
   },
   setTlgChatIdToDriver: async (driverId, tlg_chatId) => {
     return await Driver.updateOne({ _id: driverId }, { $set: { tlg_chatId } });
+  },
+  getDriverStatusByChatId: async chatId => {
+    const res = await Driver.findOne({ tlg_chatId: chatId }).select(
+      'status -_id'
+    );
+    return res.status;
+  },
+  setTempCarIdForDriver: async (chatId, carId) => {
+    return await Driver.updateOne(
+      { tlg_chatId: chatId },
+      { $set: { temp_carId: carId } }
+    );
+  },
+  getTempCarId: async chatId => {
+    return await Driver.findOne({ tlg_chatId: chatId }).select('temp_carId');
+  },
+  setTempLitres: async (chatId, litres) => {
+    return await Driver.updateOne(
+      { tlg_chatId: chatId },
+      { $set: { temp_litres: litres } }
+    );
   }
 };

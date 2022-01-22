@@ -19,8 +19,13 @@ const DriverSchema = new Schema({
   tlg_chatId: {
     type: Number
   },
-  temp_check: {
-    litres: { type: Number }
+  temp_carId: {
+    type: mongoose.ObjectId,
+    default: null
+  },
+  temp_litres: {
+    type: Number,
+    default: 0
   }
 });
 
