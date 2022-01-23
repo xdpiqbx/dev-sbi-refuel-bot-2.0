@@ -50,5 +50,10 @@ module.exports = {
     return await Driver.findOne({ tlg_chatId: chatId }).select(
       'temp_carId temp_litres status'
     );
+  },
+  resetTempDataInDriver: async driverId => {
+    await Driver.findByIdAndUpdate(driverId, {
+      $set: { temp_litres: 0, temp_carId: null }
+    });
   }
 };

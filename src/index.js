@@ -1,17 +1,11 @@
+const config = require('./config'); // for issues/319 node-telegram-bot-api
 const format = require('date-fns/format');
 const { uk } = require('date-fns/locale');
-const config = require('./config');
 
 const Bot = require('./bot/Bot');
 const bot = new Bot();
 
 const Driver = require('./entityСlasses/Driver');
-
-const axios = require('axios');
-// const fetch = (...args) =>
-//   import('node-fetch').then(({ default: fetch }) => fetch(...args));
-
-const cloudinary = require('cloudinary').v2;
 
 require('./db/mongo-instance');
 
@@ -31,8 +25,7 @@ const {
   getDriverStatusByChatId,
   setTempCarIdForDriver,
   getTempCarId,
-  setTempLitres,
-  getTmpCarIdTmpLitresDrvStatus
+  setTempLitres
 } = require('./db/driver-db-queries');
 
 const {
@@ -41,27 +34,26 @@ const {
   getAllCarsModelNumber,
   getInfoAboutCarWithDriversNames,
   setCarGasolineResidue,
-  setGiveOutOrRefuel,
-  getGiveOutOrRefuel,
-  getModelNumberGas
+  setGiveOutOrRefuel
 } = require('./db/car-db-queries');
 
 const botMessages = require('./botMessages');
-const botPhotos = require('./botPhotos');
 
 const {
-  saveCheckToDb,
   getChecksByCarId,
   getChecksByCarIdForSpecificMonth
 } = require('./db/check-db-queries');
 
 const { logStart, sortStringsFromObj } = require('./helper');
 const { newVisitor } = require('./library/userLib');
+
 const start = require('./botEvents/startBot');
+const uploadPhoto = require('./botEvents/uploadPhotoBot');
 
 logStart();
 
-start(bot); // стартую и рисую клавиатуру
+start(bot); // bot.start event
+uploadPhoto(bot); // bot.photo event
 
 bot.admin(async msg => {
   try {
@@ -148,6 +140,7 @@ bot.callbackQuery(async query => {
         );
         await setGiveOutOrRefuel(carForRefuel._id, false); // giveOutOrRefuel = false;
         await setTempCarIdForDriver(chatId, carForRefuel._id);
+        bot.deleteMessage(query.message.chat.id, query.message.message_id);
         botMessages.howMuchDoWeFill(
           bot.sendMessage.bind(bot),
           chatId,
@@ -337,18 +330,20 @@ bot.getNumberOfLiters(async msg => {
       if (car.giveOutOrRefuel) {
         // give out talon
         resLitres = car.gasoline_residue + litres;
+        await setCarGasolineResidue(car._id, resLitres);
       } else {
         // refuel
         resLitres = car.gasoline_residue - litres;
+        // setCarGasolineResidue - in bot.photo !!!
       }
-      await setCarGasolineResidue(car._id, resLitres);
       await setTempLitres(chatId, litres);
+      const driverStatus = await getDriverStatusByChatId(chatId);
       litresReport(
         chatId,
         car,
         resLitres,
         litres,
-        await getDriverStatusByChatId(chatId),
+        driverStatus,
         car.giveOutOrRefuel
       );
     }
@@ -356,80 +351,6 @@ bot.getNumberOfLiters(async msg => {
     console.log(error);
   }
 });
-
-bot.photo(async msg => {
-  const { file_id, file_unique_id } = msg.photo[3];
-
-  cloudinary.config(config.CLOUDINARY_CONFIG);
-  // queryLinkToFile - ссылка для запроса на получения инфо о файле
-  const queryLinkToFile = `https://api.telegram.org/bot${config.TOKEN}/getFile?file_id=${file_id}`;
-
-  // resp - тут ответ (инфа о фото которое отправил в телеграм)
-  const resp = await axios
-    .get(queryLinkToFile)
-    .then(response => response.data)
-    .catch(error => console.log(error));
-
-  // fileUrl - ссылка на скачивание файла
-  const fileUrl = `https://api.telegram.org/file/bot${config.TOKEN}/${resp.result.file_path}`;
-
-  const { temp_carId, temp_litres, status, _id } =
-    await getTmpCarIdTmpLitresDrvStatus(msg.chat.id);
-  // temp_carId temp_litres status
-  const car = await getModelNumberGas(temp_carId);
-
-  // carNum - номер машины без буков
-  const carNum = car.number.split(' ')[1];
-  // carModel - модель машины тире вместо пробелов
-  const carModel = car.model.split(' ').join('-');
-
-  // Загрузка файла изображения по fileUrl на cloudinary
-  // Примерно так -> `sbi-cars/Toyota-Corola-3306/16583983-vnidvbivry.jpg`
-  const date = new Date(Date.now());
-  const stringDate =
-    date.toLocaleDateString() + '-at-' + date.toLocaleTimeString();
-  date.setMinutes(date.getMinutes() + Math.abs(date.getTimezoneOffset()));
-
-  const result = await cloudinary.uploader.upload(fileUrl, {
-    resource_type: 'image',
-    public_id: `${config.CLOUDINARY_ROOT_FOLDER}/${carModel}-${carNum}/${stringDate}-${file_unique_id}`,
-    function(error, result) {
-      console.log(result, error);
-    }
-  });
-  /**/
-
-  botPhotos.sendReportWithCheckPhoto(
-    bot.sendPhoto.bind(bot),
-    msg.chat.id,
-    car,
-    temp_litres,
-    status,
-    result.secure_url
-  );
-
-  const check = {
-    date,
-    litres: temp_litres,
-    checkImageUrl: result.secure_url,
-    tlg_file_id: file_id,
-    tlg_file_unique_id: file_unique_id,
-    carId: temp_carId,
-    driverId: _id
-  };
-
-  saveCheckToDb(check);
-  // del all data about car in driver!
-});
-
-// const howManyLitres = (chatId, stateCar) => {
-//   botMessages.howMuchDoWeFill(
-//     bot.sendMessage.bind(bot),
-//     chatId,
-//     stateCar,
-//     state.driver.status
-//   );
-// };
 
 const litresReport = async (
   chatId,
