@@ -1,4 +1,3 @@
-const Driver = require('../entityСlasses/Driver');
 const botMessages = require('../botMessages');
 const { getAllCarsModelNumber } = require('../db/car-db-queries');
 const { getDriverByChatId } = require('../db/driver-db-queries');
@@ -17,9 +16,6 @@ const start = bot => {
           msg.from.username
         );
       } else {
-        // const driver = new Driver(dbResponse);
-        // // state.check.driverId = driver._id;
-        // if (driver.tlg_chatId === msg.chat.id) {
         const cars = await getAllCarsModelNumber();
         botMessages.startDialog(
           bot.sendMessage.bind(bot),
@@ -28,7 +24,6 @@ const start = bot => {
           ACTION.CARS_FOR_REFUEL
         );
       }
-      // }
     } catch (e) {
       console.log(e);
     }

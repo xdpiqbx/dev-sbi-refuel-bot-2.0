@@ -45,5 +45,10 @@ module.exports = {
       { tlg_chatId: chatId },
       { $set: { temp_litres: litres } }
     );
+  },
+  getTmpCarIdTmpLitresDrvStatus: async chatId => {
+    return await Driver.findOne({ tlg_chatId: chatId }).select(
+      'temp_carId temp_litres status'
+    );
   }
 };

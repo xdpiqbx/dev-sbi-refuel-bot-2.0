@@ -24,5 +24,10 @@ module.exports = {
       { _id: carId },
       { $set: { giveOutOrRefuel } }
     );
+  },
+  getModelNumberGas: async carId => {
+    return await Car.findById(carId).select(
+      'model number gasoline_residue -_id'
+    );
   }
 };

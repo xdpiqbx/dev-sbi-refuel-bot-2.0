@@ -7,8 +7,9 @@ const bot = new Bot();
 
 const Driver = require('./entityСlasses/Driver');
 
-const fetch = (...args) =>
-  import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const axios = require('axios');
+// const fetch = (...args) =>
+//   import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const cloudinary = require('cloudinary').v2;
 
@@ -30,7 +31,8 @@ const {
   getDriverStatusByChatId,
   setTempCarIdForDriver,
   getTempCarId,
-  setTempLitres
+  setTempLitres,
+  getTmpCarIdTmpLitresDrvStatus
 } = require('./db/driver-db-queries');
 
 const {
@@ -40,7 +42,8 @@ const {
   getInfoAboutCarWithDriversNames,
   setCarGasolineResidue,
   setGiveOutOrRefuel,
-  getGiveOutOrRefuel
+  getGiveOutOrRefuel,
+  getModelNumberGas
 } = require('./db/car-db-queries');
 
 const botMessages = require('./botMessages');
@@ -58,36 +61,7 @@ const start = require('./botEvents/startBot');
 
 logStart();
 
-// стартую и рисую клавиатуру
-start(bot);
-// bot.start(async msg => {
-//   try {
-//     const dbResponse = await getDriverByChatId(msg.chat.id);
-//     if (!dbResponse) {
-//       newVisitor(
-//         bot.sendMessage.bind(bot),
-//         msg.chat.id,
-//         msg.from.first_name,
-//         msg.from.username
-//       );
-//     } else {
-//       const driver = new Driver(dbResponse);
-//       state.check.driverId = driver._id;
-//       if (driver.tlg_chatId === msg.chat.id) {
-//         const cars = await getAllCarsModelNumber();
-//         sortStringsFromObj(cars, 'model');
-//         botMessages.startDialog(
-//           bot.sendMessage.bind(bot),
-//           msg.chat.id,
-//           cars,
-//           ACTION.CARS_FOR_REFUEL
-//         );
-//       }
-//     }
-//   } catch (e) {
-//     console.log(e);
-//   }
-// });
+start(bot); // стартую и рисую клавиатуру
 
 bot.admin(async msg => {
   try {
@@ -384,12 +358,68 @@ bot.getNumberOfLiters(async msg => {
 });
 
 bot.photo(async msg => {
-  const photoElement = msg.photo[3];
-  state.check.tlg_file_id = photoElement.file_id;
-  state.check.tlg_file_unique_id = photoElement.file_unique_id;
-  state.check.checkImageUrl = await getLinkToUploadedPhoto(photoElement);
-  // тут проверить: литры и машина
-  resultReport(msg.chat.id);
+  const { file_id, file_unique_id } = msg.photo[3];
+
+  cloudinary.config(config.CLOUDINARY_CONFIG);
+  // queryLinkToFile - ссылка для запроса на получения инфо о файле
+  const queryLinkToFile = `https://api.telegram.org/bot${config.TOKEN}/getFile?file_id=${file_id}`;
+
+  // resp - тут ответ (инфа о фото которое отправил в телеграм)
+  const resp = await axios
+    .get(queryLinkToFile)
+    .then(response => response.data)
+    .catch(error => console.log(error));
+
+  // fileUrl - ссылка на скачивание файла
+  const fileUrl = `https://api.telegram.org/file/bot${config.TOKEN}/${resp.result.file_path}`;
+
+  const { temp_carId, temp_litres, status, _id } =
+    await getTmpCarIdTmpLitresDrvStatus(msg.chat.id);
+  // temp_carId temp_litres status
+  const car = await getModelNumberGas(temp_carId);
+
+  // carNum - номер машины без буков
+  const carNum = car.number.split(' ')[1];
+  // carModel - модель машины тире вместо пробелов
+  const carModel = car.model.split(' ').join('-');
+
+  // Загрузка файла изображения по fileUrl на cloudinary
+  // Примерно так -> `sbi-cars/Toyota-Corola-3306/16583983-vnidvbivry.jpg`
+  const date = new Date(Date.now());
+  const stringDate =
+    date.toLocaleDateString() + '-at-' + date.toLocaleTimeString();
+  date.setMinutes(date.getMinutes() + Math.abs(date.getTimezoneOffset()));
+
+  const result = await cloudinary.uploader.upload(fileUrl, {
+    resource_type: 'image',
+    public_id: `${config.CLOUDINARY_ROOT_FOLDER}/${carModel}-${carNum}/${stringDate}-${file_unique_id}`,
+    function(error, result) {
+      console.log(result, error);
+    }
+  });
+  /**/
+
+  botPhotos.sendReportWithCheckPhoto(
+    bot.sendPhoto.bind(bot),
+    msg.chat.id,
+    car,
+    temp_litres,
+    status,
+    result.secure_url
+  );
+
+  const check = {
+    date,
+    litres: temp_litres,
+    checkImageUrl: result.secure_url,
+    tlg_file_id: file_id,
+    tlg_file_unique_id: file_unique_id,
+    carId: temp_carId,
+    driverId: _id
+  };
+
+  saveCheckToDb(check);
+  // del all data about car in driver!
 });
 
 // const howManyLitres = (chatId, stateCar) => {
@@ -429,51 +459,6 @@ const litresReport = async (
       status
     );
   }
-};
-
-const getLinkToUploadedPhoto = async photoElement => {
-  cloudinary.config(config.CLOUDINARY_CONFIG);
-  // queryLinkToFile - ссылка для запроса на получения инфо о файле
-  const queryLinkToFile = `https://api.telegram.org/bot${config.TOKEN}/getFile?file_id=${photoElement.file_id}`;
-  // resp - тут ответ (инфа о файле)
-  const resp = await fetch(queryLinkToFile)
-    .then(response => response.json())
-    .catch(e => {
-      console.log('=======>>> await fetch(queryLinkToFile)');
-      console.log(e);
-    });
-  // fileUrl - ссылка на скачивание файла
-  const fileUrl = `https://api.telegram.org/file/bot${config.TOKEN}/${resp.result.file_path}`;
-
-  // carNum - номер машины без буков
-  const carNum = state.car.number.split(' ')[1];
-  // carModel - модель машины тире вместо пробелов
-  const carModel = state.car.model.split(' ').join('-');
-
-  // Загрузка файла изображения по fileUrl на cloudinary
-  // Примерно так -> `sbi-cars/Toyota-Corola-3306/16583983-vnidvbivry.jpg`
-  const result = await cloudinary.uploader.upload(fileUrl, {
-    resource_type: 'image',
-    public_id: `${config.CLOUDINARY_ROOT_FOLDER}/${carModel}-${carNum}/${state.check.date}-${state.check.tlg_file_unique_id}`,
-    function(error, result) {
-      console.log(result, error);
-    }
-  });
-
-  return result.secure_url;
-};
-
-const resultReport = async chatId => {
-  botPhotos.sendReportWithCheckPhoto(
-    bot.sendPhoto.bind(bot),
-    chatId,
-    state.car,
-    state.check.litres,
-    state.driver.status,
-    state.check.checkImageUrl
-  );
-  saveCheckToDb(state.check);
-  state = JSON.parse(initialState);
 };
 
 // const newVisitor = (chatId, firstName, userName) => {
