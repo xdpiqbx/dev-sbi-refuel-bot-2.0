@@ -47,39 +47,41 @@ const { newVisitor } = require('./library/userLib');
 const start = require('./botEvents/startBot');
 const uploadPhoto = require('./botEvents/uploadPhotoBot');
 const getNumberBot = require('./botEvents/getNumberBot');
+const admin = require('./botEvents/adminBot');
 
 logStart();
 
 start(bot); // bot.start event
 uploadPhoto(bot); // bot.photo event
 getNumberBot(bot); // bot.getNumberOfLiters event
+admin(bot); // bot.admin
 
-bot.admin(async msg => {
-  try {
-    const driver = await getDriverByChatId(msg.chat.id);
-    if (!driver) {
-      newVisitor(msg.chat.id, msg.from.first_name, msg.from.username);
-    } else {
-      if (driver.status > 2) {
-        botMessages.accessDenied(bot.sendMessage.bind(bot), msg.chat.id);
-      } else {
-        state.check.driverId = driver._id;
-        state.driver._id = driver._id;
-        state.driver.name = driver.name;
-        state.driver.status = driver.status;
-        state.driver.carsIds = driver.carsIds;
-        state.driver.tlg_chatId = driver.tlg_chatId;
-        botMessages.mainAdminKeyboard(
-          bot.sendMessage.bind(bot),
-          msg.chat.id,
-          state.driver.status
-        );
-      }
-    }
-  } catch (e) {
-    console.log(e);
-  }
-});
+// bot.admin(async msg => {
+//   try {
+//     const driver = await getDriverByChatId(msg.chat.id);
+//     if (!driver) {
+//       newVisitor(msg.chat.id, msg.from.first_name, msg.from.username);
+//     } else {
+//       if (driver.status > 2) {
+//         botMessages.accessDenied(bot.sendMessage.bind(bot), msg.chat.id);
+//       } else {
+//         state.check.driverId = driver._id;
+//         state.driver._id = driver._id;
+//         state.driver.name = driver.name;
+//         state.driver.status = driver.status;
+//         state.driver.carsIds = driver.carsIds;
+//         state.driver.tlg_chatId = driver.tlg_chatId;
+//         botMessages.mainAdminKeyboard(
+//           bot.sendMessage.bind(bot),
+//           msg.chat.id,
+//           state.driver.status
+//         );
+//       }
+//     }
+//   } catch (e) {
+//     console.log(e);
+//   }
+// });
 
 bot.message(async msg => {
   const chatId = msg.chat.id;
@@ -99,7 +101,7 @@ bot.message(async msg => {
         ? aboutCar(chatId)
         : botMessages.accessDenied(bot.sendMessage.bind(bot), chatId); // Done
       break;
-    case KB_BTNS.CAR_REFUEL_STAT: // !!!!!!!!!!!!===============================
+    case KB_BTNS.CAR_REFUEL_STAT: // Done
       state.driver.status < 2
         ? carStatistic(chatId)
         : botMessages.accessDenied(bot.sendMessage.bind(bot), chatId);
@@ -165,6 +167,7 @@ bot.callbackQuery(async query => {
       );
       break;
     case ACTION.ADD_NEW_DRIVER_TO_DB:
+      // Rerfactored
       const { acknowledged, modifiedCount } = await setTlgChatIdToDriver(
         dataFromQuery._id,
         dataFromQuery.id //candidateChatId

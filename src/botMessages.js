@@ -11,7 +11,7 @@ const {
 
 module.exports = {
   accessDenied: (sendMessage, chatId) => {
-    const message = `Адміністративний розділ для .\n<b>У доступі відмовлено.</b>\nДля початку роботи натисніть /start`;
+    const message = `Адміністративний розділ.\n<b>У доступі відмовлено.</b>\nДля початку роботи натисніть /start`;
     const options = {
       parse_mode: 'HTML'
     };

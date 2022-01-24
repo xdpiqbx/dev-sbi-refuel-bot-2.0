@@ -1,3 +1,4 @@
+const dbQuerieErrors = require('../errorCodes');
 const Driver = require('./model/driver.model');
 
 module.exports = {
@@ -29,7 +30,11 @@ module.exports = {
     const res = await Driver.findOne({ tlg_chatId: chatId }).select(
       'status -_id'
     );
-    return res.status;
+    if (!res) {
+      return dbQuerieErrors.NOT_EXIST;
+    } else {
+      return res.status;
+    }
   },
   setTempCarIdForDriver: async (chatId, carId) => {
     return await Driver.updateOne(
