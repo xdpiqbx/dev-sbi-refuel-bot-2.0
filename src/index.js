@@ -23,9 +23,7 @@ const {
   getDriverByIdWithoutCars,
   setTlgChatIdToDriver,
   getDriverStatusByChatId,
-  setTempCarIdForDriver,
-  getTempCarId,
-  setTempLitres
+  setTempCarIdForDriver
 } = require('./db/driver-db-queries');
 
 const {
@@ -33,7 +31,6 @@ const {
   getAllCarsModelNumberGas,
   getAllCarsModelNumber,
   getInfoAboutCarWithDriversNames,
-  setCarGasolineResidue,
   setGiveOutOrRefuel
 } = require('./db/car-db-queries');
 
@@ -49,11 +46,13 @@ const { newVisitor } = require('./library/userLib');
 
 const start = require('./botEvents/startBot');
 const uploadPhoto = require('./botEvents/uploadPhotoBot');
+const getNumberBot = require('./botEvents/getNumberBot');
 
 logStart();
 
 start(bot); // bot.start event
 uploadPhoto(bot); // bot.photo event
+getNumberBot(bot); // bot.getNumberOfLiters event
 
 bot.admin(async msg => {
   try {
@@ -315,87 +314,6 @@ bot.callbackQuery(async query => {
       break;
   }
 });
-// любое число от 0-999 (сюда я ловлю литры)
-bot.getNumberOfLiters(async msg => {
-  // Refactored
-  const chatId = msg.chat.id;
-  try {
-    const carId = await getTempCarId(chatId);
-    if (!carId.temp_carId) {
-      botMessages.offerToPressStart(bot.sendMessage.bind(bot), chatId);
-    } else {
-      const car = await getCarByIdWithoutDriversIds(carId.temp_carId);
-      const litres = parseInt(msg.text.trim());
-      let resLitres = 0;
-      if (car.giveOutOrRefuel) {
-        // give out talon
-        resLitres = car.gasoline_residue + litres;
-        await setCarGasolineResidue(car._id, resLitres);
-      } else {
-        // refuel
-        resLitres = car.gasoline_residue - litres;
-        // setCarGasolineResidue - in bot.photo !!!
-      }
-      await setTempLitres(chatId, litres);
-      const driverStatus = await getDriverStatusByChatId(chatId);
-      litresReport(
-        chatId,
-        car,
-        resLitres,
-        litres,
-        driverStatus,
-        car.giveOutOrRefuel
-      );
-    }
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-const litresReport = async (
-  chatId,
-  car,
-  resLitres,
-  litres,
-  status,
-  giveOutOrRefuel
-) => {
-  if (giveOutOrRefuel) {
-    botMessages.giveOutReport(
-      bot.sendMessage.bind(bot),
-      chatId,
-      car,
-      resLitres,
-      litres,
-      status
-    );
-    await setCarGasolineResidue(car._id, car.gasoline_residue);
-  } else {
-    botMessages.refuelReportAndAskForCheck(
-      bot.sendMessage.bind(bot),
-      chatId,
-      car,
-      resLitres,
-      litres,
-      status
-    );
-  }
-};
-
-// const newVisitor = (chatId, firstName, userName) => {
-//   state.candidateChatId = chatId;
-//   botMessages.messageForNewVisitor(
-//     bot.sendMessage.bind(bot),
-//     chatId,
-//     firstName
-//   );
-//   botMessages.reportForCreatorAboutNewUser(
-//     bot.sendMessage.bind(bot),
-//     state.creatorChatId,
-//     firstName,
-//     userName
-//   );
-// };
 
 const addDriverToDb = async (chatId, candidateChatId) => {
   const driversWithoutChatId = await getAllDriversWithoutChatId();
