@@ -16,15 +16,6 @@ module.exports = {
   setCarGasolineResidue: async (carId, gasoline_residue) => {
     await Car.updateOne({ _id: carId }, { $set: { gasoline_residue } });
   },
-  getGiveOutOrRefuel: async carId => {
-    return await Car.findById(carId).select('giveOutOrRefuel');
-  },
-  setGiveOutOrRefuel: async (carId, giveOutOrRefuel) => {
-    return await Car.findOneAndUpdate(
-      { _id: carId },
-      { $set: { giveOutOrRefuel } }
-    );
-  },
   getModelNumberGas: async carId => {
     return await Car.findById(carId).select(
       'model number gasoline_residue -_id'

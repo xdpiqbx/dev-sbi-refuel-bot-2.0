@@ -23,15 +23,15 @@ const {
   getDriverByIdWithoutCars,
   setTlgChatIdToDriver,
   getDriverStatusByChatId,
-  setTempCarIdForDriver
+  setTempCarIdForDriver,
+  setGiveOutOrRefuel
 } = require('./db/driver-db-queries');
 
 const {
   getCarByIdWithoutDriversIds,
   getAllCarsModelNumberGas,
   getAllCarsModelNumber,
-  getInfoAboutCarWithDriversNames,
-  setGiveOutOrRefuel
+  getInfoAboutCarWithDriversNames
 } = require('./db/car-db-queries');
 
 const botMessages = require('./botMessages');
@@ -137,7 +137,7 @@ bot.callbackQuery(async query => {
         const carForRefuel = await getCarByIdWithoutDriversIds(
           dataFromQuery.id
         );
-        await setGiveOutOrRefuel(carForRefuel._id, false); // giveOutOrRefuel = false;
+        await setGiveOutOrRefuel(chatId, false); // giveOutOrRefuel = false;
         await setTempCarIdForDriver(chatId, carForRefuel._id);
         bot.deleteMessage(query.message.chat.id, query.message.message_id);
         botMessages.howMuchDoWeFill(

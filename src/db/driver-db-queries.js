@@ -53,7 +53,19 @@ module.exports = {
   },
   resetTempDataInDriver: async driverId => {
     await Driver.findByIdAndUpdate(driverId, {
-      $set: { temp_litres: 0, temp_carId: null }
+      $set: { temp_litres: 0, temp_carId: null, giveOutOrRefuel: false }
     });
+  },
+  getGiveOutOrRefuel: async chatId => {
+    const res = await Driver.findOne({ tlg_chatId: chatId }).select(
+      'giveOutOrRefuel'
+    );
+    return res.giveOutOrRefuel;
+  },
+  setGiveOutOrRefuel: async (chatId, giveOutOrRefuel) => {
+    return await Driver.updateOne(
+      { tlg_chatId: chatId },
+      { $set: { giveOutOrRefuel: giveOutOrRefuel } }
+    );
   }
 };

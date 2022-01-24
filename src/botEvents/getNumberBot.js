@@ -6,7 +6,8 @@ const {
 const {
   getTempCarId,
   setTempLitres,
-  getDriverStatusByChatId
+  getDriverStatusByChatId,
+  getGiveOutOrRefuel
 } = require('../db/driver-db-queries');
 
 const getNumberBot = bot => {
@@ -20,9 +21,10 @@ const getNumberBot = bot => {
         botMessages.offerToPressStart(bot.sendMessage.bind(bot), chatId);
       } else {
         const car = await getCarByIdWithoutDriversIds(carId.temp_carId);
+        const giveOutOrRefuel = await getGiveOutOrRefuel(chatId);
         const litres = parseInt(msg.text.trim());
         let resLitres = 0;
-        if (car.giveOutOrRefuel) {
+        if (giveOutOrRefuel) {
           // give out talon
           resLitres = car.gasoline_residue + litres;
           await setCarGasolineResidue(car._id, resLitres);
@@ -34,12 +36,13 @@ const getNumberBot = bot => {
         await setTempLitres(chatId, litres);
         const driverStatus = await getDriverStatusByChatId(chatId);
         litresReport(
+          bot,
           chatId,
           car,
           resLitres,
           litres,
           driverStatus,
-          car.giveOutOrRefuel
+          giveOutOrRefuel
         );
       }
     } catch (error) {
@@ -49,6 +52,7 @@ const getNumberBot = bot => {
 };
 
 const litresReport = async (
+  bot,
   chatId,
   car,
   resLitres,

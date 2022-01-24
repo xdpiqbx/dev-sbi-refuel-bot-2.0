@@ -26,6 +26,10 @@ const DriverSchema = new Schema({
   temp_litres: {
     type: Number,
     default: 0
+  },
+  giveOutOrRefuel: {
+    type: Boolean,
+    default: false
   }
 });
 
