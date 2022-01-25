@@ -9,7 +9,6 @@ const Driver = require('./entityСlasses/Driver');
 
 require('./db/mongo-instance');
 
-// const KB_BTNS = require('./keyboard-buttons');
 const ACTION = require('./inline-keyboard-actions');
 
 const state = require('./state');
@@ -38,7 +37,6 @@ const {
 } = require('./db/check-db-queries');
 
 const { logStart, sortStringsFromObj } = require('./helper');
-// const { newVisitor } = require('./library/userLib');
 
 const start = require('./botEvents/startBot');
 const uploadPhoto = require('./botEvents/uploadPhotoBot');
@@ -53,41 +51,6 @@ uploadPhoto(bot); // bot.photo event
 getNumber(bot); // bot.getNumberOfLiters event
 admin(bot); // bot.admin
 message(bot); // bot.message
-
-// bot.message(async msg => {
-//   const chatId = msg.chat.id;
-//   const status = await getDriverStatusByChatId(msg.chat.id);
-//   switch (msg.text) {
-//     case KB_BTNS.GIVE_OUT_FUEL:
-//       status === 0
-//         ? giveOutFuel(chatId)
-//         : botMessages.accessDenied(bot.sendMessage.bind(bot), chatId); // Done
-//       break;
-//     case KB_BTNS.TOTAL_FUEL_BALANCE:
-//       status < 2
-//         ? totalFuelBalance(chatId)
-//         : botMessages.accessDenied(bot.sendMessage.bind(bot), chatId); // Done
-//       break;
-//     case KB_BTNS.ABOUT_CAR: // Done
-//       status < 3
-//         ? aboutCar(chatId)
-//         : botMessages.accessDenied(bot.sendMessage.bind(bot), chatId); // Done
-//       break;
-//     case KB_BTNS.CAR_REFUEL_STAT: // Done
-//       status < 2
-//         ? carStatistic(chatId)
-//         : botMessages.accessDenied(bot.sendMessage.bind(bot), chatId);
-//       break;
-//     case KB_BTNS.ABOUT_DRIVER: // Done
-//       status < 3
-//         ? aboutDriver(chatId)
-//         : botMessages.accessDenied(bot.sendMessage.bind(bot), chatId);
-//       break;
-//     case KB_BTNS.MY_CARS: // Done
-//       myCars(chatId);
-//       break;
-//   }
-// });
 
 bot.callbackQuery(async query => {
   const dataFromQuery = JSON.parse(query.data);
@@ -304,62 +267,3 @@ const addDriverToDb = async (chatId, candidateChatId) => {
 const candidatRejected = chatId => {
   botMessages.newUserRejected(bot.sendMessage.bind(bot), chatId);
 };
-
-// const myCars = async chatId => {
-//   if (!state.driver._id) {
-//     const driver = await getDriverByChatId(chatId);
-//     state.driver._id = driver._id;
-//   }
-//   const driver = await getDriverByIdWithCars(state.driver._id);
-//   sortStringsFromObj(driver.carsIds, 'model');
-//   botMessages.carsAssignedToDriver(bot.sendMessage.bind(bot), chatId, driver);
-// };
-
-// const giveOutFuel = async chatId => {
-//   const cars = await getAllCarsModelNumber();
-//   sortStringsFromObj(cars, 'model');
-//   botMessages.giveOutGasoline(
-//     bot.sendMessage.bind(bot),
-//     chatId,
-//     cars,
-//     ACTION.GIVE_OUT_FUEL
-//   );
-// };
-
-// const totalFuelBalance = async chatId => {
-//   const cars = await getAllCarsModelNumberGas();
-//   sortStringsFromObj(cars, 'model');
-//   botMessages.totalFuelBalance(bot.sendMessage.bind(bot), chatId, cars);
-// };
-
-// const aboutCar = async chatId => {
-//   const cars = await getAllCarsModelNumber();
-//   sortStringsFromObj(cars, 'model');
-//   botMessages.inlineKbdListOfCars(
-//     bot.sendMessage.bind(bot),
-//     chatId,
-//     cars,
-//     ACTION.INFO_ABOUT_CAR
-//   );
-// };
-
-// const carStatistic = async chatId => {
-//   const cars = await getAllCarsModelNumber();
-//   sortStringsFromObj(cars, 'model');
-//   botMessages.inlineKbdListOfCars(
-//     bot.sendMessage.bind(bot),
-//     chatId,
-//     cars,
-//     ACTION.CAR_STATISTIC
-//   );
-// };
-
-// const aboutDriver = async chatId => {
-//   const drivers = await getAllDriversByAlphabet();
-//   botMessages.inlineKbdListOfDrivers(
-//     bot.sendMessage.bind(bot),
-//     chatId,
-//     drivers,
-//     ACTION.INFO_ABOUT_DRIVER
-//   );
-// };
