@@ -10,7 +10,7 @@ const {
   getGiveOutOrRefuel
 } = require('../db/driver-db-queries');
 
-const getNumberBot = bot => {
+const getNumber = bot => {
   // любое число от 0-999 (сюда я ловлю литры)
   bot.getNumberOfLiters(async msg => {
     // Refactored
@@ -82,4 +82,4 @@ const litresReport = async (
   }
 };
 
-module.exports = getNumberBot;
+module.exports = getNumber;

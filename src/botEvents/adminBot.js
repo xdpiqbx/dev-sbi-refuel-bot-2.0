@@ -7,7 +7,6 @@ const admin = bot => {
   bot.admin(async msg => {
     try {
       const status = await getDriverStatusByChatId(msg.chat.id);
-      console.log(status);
       if (status === dbQuerieErrors.NOT_EXIST) {
         newVisitor(
           bot.sendMessage.bind(bot),
