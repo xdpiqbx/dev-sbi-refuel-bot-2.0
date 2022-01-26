@@ -27,6 +27,7 @@ const getNumber = bot => {
         if (giveOutOrRefuel) {
           // give out talon
           resLitres = car.gasoline_residue + litres;
+          console.log(car);
           await setCarGasolineResidue(car._id, resLitres);
         } else {
           // refuel
