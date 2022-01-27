@@ -7,7 +7,8 @@ const {
   getDriverStatusByChatId,
   getAllDriversByAlphabet,
   getDriverByChatId,
-  getDriverByIdWithCars
+  getDriverByIdWithCars,
+  setGiveOutOrRefuel
 } = require('../db/driver-db-queries');
 const { sortStringsFromObj } = require('../helper');
 const KB_BTNS = require('../keyboard-buttons');
@@ -52,6 +53,7 @@ const message = bot => {
 
 const giveOutFuel = async (sendMessage, chatId) => {
   const cars = await getAllCarsModelNumber();
+  await setGiveOutOrRefuel(chatId, true);
   sortStringsFromObj(cars, 'model');
   botMessages.giveOutGasoline(sendMessage, chatId, cars, ACTION.GIVE_OUT_FUEL);
 };

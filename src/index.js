@@ -88,14 +88,8 @@ bot.callbackQuery(async query => {
       }
       break;
     case ACTION.GIVE_OUT_FUEL:
-      // state.giveOutOrRefuel = true;
       const carForGiveOut = await getCarByIdWithoutDriversIds(dataFromQuery.id);
-      await setGiveOutOrRefuel(chatId, true);
       await setTempCarIdForDriver(chatId, carForGiveOut._id);
-      // state.car._id = car._id;
-      // state.car.model = car.model;
-      // state.car.number = car.number;
-      // state.car.gasoline_residue = car.gasoline_residue;
 
       botMessages.autoIsSelectedForGiveOutGasoline(
         bot.sendMessage.bind(bot),

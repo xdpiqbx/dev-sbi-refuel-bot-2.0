@@ -20,10 +20,6 @@ const CarSchema = new Schema({
       ref: 'driver'
     }
   ]
-  // giveOutOrRefuel: {
-  //   type: Boolean,
-  //   default: false
-  // }
 });
 
 const Car = model('car', CarSchema);

@@ -18,12 +18,6 @@ const admin = bot => {
         if (status > 2) {
           botMessages.accessDenied(bot.sendMessage.bind(bot), msg.chat.id);
         } else {
-          // state.check.driverId = driver._id;
-          // state.driver._id = driver._id;
-          // state.driver.name = driver.name;
-          // state.driver.status = driver.status;
-          // state.driver.carsIds = driver.carsIds;
-          // state.driver.tlg_chatId = driver.tlg_chatId;
           botMessages.mainAdminKeyboard(
             bot.sendMessage.bind(bot),
             msg.chat.id,
