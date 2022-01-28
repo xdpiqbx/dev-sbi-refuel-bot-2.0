@@ -1,3 +1,5 @@
+const config = require('../config');
+
 class Driver {
   _id = null;
   name = '';
@@ -5,7 +7,7 @@ class Driver {
   carsIds = [];
   tlg_chatId = null;
   candidateChatId = null;
-  creatorChatId = 938358368;
+  creatorChatId = config.CREATOR_CHAT_ID;
 
   constructor(driver) {
     this._id = driver._id;
@@ -14,7 +16,7 @@ class Driver {
     this.carsIds = driver.carsIds;
     this.tlg_chatId = driver.tlg_chatId;
     this.candidateChatId = null;
-    this.creatorChatId = 938358368;
+    this.creatorChatId = config.CREATOR_CHAT_ID;
   }
 }
 

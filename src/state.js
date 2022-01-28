@@ -26,6 +26,5 @@ module.exports = {
     carId: null
   },
   candidateChatId: null,
-  creatorChatId: 938358368,
   giveOutOrRefuel: false
 };

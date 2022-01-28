@@ -8,6 +8,7 @@ const {
   monthsesToInlineKeyboard,
   candidateAddReject
 } = require('./inline-keyboards');
+const config = require('./config');
 
 module.exports = {
   accessDenied: (sendMessage, chatId) => {
@@ -59,8 +60,8 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(candidate.creatorChatId, message, options).then(() => {
-      sendMessage(candidate.creatorChatId, `Добавить?`, {
+    sendMessage(config.CREATOR_CHAT_ID, message, options).then(() => {
+      sendMessage(config.CREATOR_CHAT_ID, `Добавить?`, {
         reply_markup: {
           inline_keyboard: candidateAddReject(candidate.tlg_chatId, action)
         }

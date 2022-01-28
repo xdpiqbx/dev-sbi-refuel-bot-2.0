@@ -45,7 +45,7 @@ const message = bot => {
           : botMessages.accessDenied(bot.sendMessage.bind(bot), chatId);
         break;
       case KB_BTNS.MY_CARS: // Done
-        myCars(chatId);
+        myCars(bot.sendMessage.bind(bot), chatId);
         break;
     }
   });
@@ -101,9 +101,9 @@ const myCars = async (sendMessage, chatId) => {
   if (!driver) {
     botMessages.accessDenied(sendMessage, chatId);
   } else {
-    const driver = await getDriverByIdWithCars(driver._id);
-    sortStringsFromObj(driver.carsIds, 'model');
-    botMessages.carsAssignedToDriver(sendMessage, chatId, driver);
+    const drv = await getDriverByIdWithCars(driver._id);
+    sortStringsFromObj(drv.carsIds, 'model');
+    botMessages.carsAssignedToDriver(sendMessage, chatId, drv);
   }
 };
 
