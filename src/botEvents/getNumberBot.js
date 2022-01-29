@@ -41,7 +41,7 @@ const getNumber = bot => {
           car,
           resLitres,
           litres,
-          driverStatus,
+          driverStatus.status,
           giveOutOrRefuel
         );
       }

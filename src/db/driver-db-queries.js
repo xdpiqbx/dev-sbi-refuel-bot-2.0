@@ -8,8 +8,8 @@ module.exports = {
       .collation({ locale: 'uk' })
       .sort({ name: 1 });
   },
-  getDriverByChatId: async chatId => {
-    return await Driver.findOne({ tlg_chatId: chatId });
+  getDriverIdByChatId: async chatId => {
+    return await Driver.findOne({ tlg_chatId: chatId }).select('_id');
   },
   getAllDriversWithoutChatId: async () => {
     return await Driver.find({ tlg_chatId: null });
@@ -27,13 +27,11 @@ module.exports = {
     return await Driver.updateOne({ _id: driverId }, { $set: { tlg_chatId } });
   },
   getDriverStatusByChatId: async chatId => {
-    const res = await Driver.findOne({ tlg_chatId: chatId }).select(
-      'status -_id'
-    );
+    const res = await Driver.findOne({ tlg_chatId: chatId }).select('status');
     if (!res) {
-      return dbQuerieErrors.NOT_EXIST;
+      return { _id: null, status: dbQuerieErrors.NOT_EXIST };
     } else {
-      return res.status;
+      return res;
     }
   },
   setTempCarIdForDriver: async (chatId, carId) => {

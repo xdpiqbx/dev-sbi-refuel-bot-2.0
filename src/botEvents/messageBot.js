@@ -6,7 +6,7 @@ const {
 const {
   getDriverStatusByChatId,
   getAllDriversByAlphabet,
-  getDriverByChatId,
+  getDriverIdByChatId,
   getDriverByIdWithCars,
   setGiveOutOrRefuel
 } = require('../db/driver-db-queries');
@@ -17,7 +17,7 @@ const ACTION = require('../inline-keyboard-actions');
 const message = bot => {
   bot.message(async msg => {
     const chatId = msg.chat.id;
-    const status = await getDriverStatusByChatId(msg.chat.id);
+    const { status } = await getDriverStatusByChatId(msg.chat.id);
     switch (msg.text) {
       case KB_BTNS.GIVE_OUT_FUEL:
         status === 0
@@ -97,7 +97,7 @@ const aboutDriver = async (sendMessage, chatId) => {
 };
 
 const myCars = async (sendMessage, chatId) => {
-  const driver = await getDriverByChatId(chatId);
+  const driver = await getDriverIdByChatId(chatId);
   if (!driver) {
     botMessages.accessDenied(sendMessage, chatId);
   } else {

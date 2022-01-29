@@ -1,14 +1,14 @@
 const botMessages = require('../botMessages');
 const { getAllCarsModelNumber } = require('../db/car-db-queries');
-const { getDriverByChatId } = require('../db/driver-db-queries');
+const { getDriverIdByChatId } = require('../db/driver-db-queries');
 const { newVisitor } = require('../library/userLib');
 const ACTION = require('../inline-keyboard-actions');
 
 const start = bot => {
   bot.start(async msg => {
     try {
-      const dbResponse = await getDriverByChatId(msg.chat.id);
-      if (!dbResponse) {
+      const driver = await getDriverIdByChatId(msg.chat.id);
+      if (!driver) {
         newVisitor(
           bot.sendMessage.bind(bot),
           msg.chat.id,
