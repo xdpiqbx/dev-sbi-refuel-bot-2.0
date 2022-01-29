@@ -1,6 +1,6 @@
 const botMessages = require('../botMessages');
 const DriverCandidate = require('../entityСlasses/DriverCandidate');
-const inlineKeyboardActions = require('../inline-keyboard-actions');
+const ACTION = require('../keyboards/inline-actions');
 
 const newVisitor = (botSendMessage, chatId, firstName, userName) => {
   const candidate = new DriverCandidate({ chatId, firstName, userName });
@@ -8,7 +8,7 @@ const newVisitor = (botSendMessage, chatId, firstName, userName) => {
   botMessages.reportForCreatorAboutNewUser(
     botSendMessage,
     candidate,
-    inlineKeyboardActions.CANDIDATE_YES_NO
+    ACTION.CANDIDATE_YES_NO
   );
 };
 

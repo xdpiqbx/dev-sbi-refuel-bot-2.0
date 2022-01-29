@@ -26,7 +26,7 @@ const {
 } = require('../../db/driver-db-queries');
 
 const Driver = require('../../entityСlasses/Driver');
-const ACTION = require('../../inline-keyboard-actions');
+const ACTION = require('../../keyboards/inline-actions');
 
 const callbackQuery = bot => {
   bot.callbackQuery(async query => {

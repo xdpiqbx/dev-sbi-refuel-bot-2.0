@@ -5,7 +5,7 @@ const {
   resetTempDataInDriver
 } = require('../db/driver-db-queries');
 const { newVisitor } = require('../library/userLib');
-const ACTION = require('../inline-keyboard-actions');
+const ACTION = require('../keyboards/inline-actions');
 
 const start = bot => {
   bot.start(async msg => {

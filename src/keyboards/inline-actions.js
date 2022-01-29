@@ -3,7 +3,9 @@ module.exports = {
   CARS_FOR_REFUEL: 'cfr',
   GIVE_OUT_FUEL: 'gof',
   INFO_ABOUT_CAR: 'iac',
-  CAR_STATISTIC: 'cs',
   INFO_ABOUT_DRIVER: 'iad',
-  GET_STATS_FOR_MONTH: 'gsfm'
+  CAR_STATISTIC: 'cs',
+  GET_LIST_OF_YEARS: 'loy',
+  GET_STATS_FOR_MONTH: 'gsfm',
+  CANDIDATE_YES_NO: 'cyn'
 };

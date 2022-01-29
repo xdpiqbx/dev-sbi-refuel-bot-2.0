@@ -13,8 +13,8 @@ const {
   setGiveOutOrRefuel
 } = require('../db/driver-db-queries');
 
-const KB_BTNS = require('../keyboard-buttons');
-const ACTION = require('../inline-keyboard-actions');
+const KB_BTNS = require('../keyboards/buttons');
+const ACTION = require('../keyboards/inline-actions');
 
 const message = bot => {
   bot.message(async msg => {

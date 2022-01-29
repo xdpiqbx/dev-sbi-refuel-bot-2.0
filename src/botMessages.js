@@ -1,5 +1,5 @@
 const format = require('date-fns/format');
-const KB_BTNS = require('./keyboard-buttons');
+const KB_BTNS = require('./keyboards/buttons');
 const {
   driversWithoutChatIdToInlineKeyboard,
   carsToInlineKeyboard,
@@ -7,7 +7,7 @@ const {
   yearsToInlineKeyboard,
   monthsesToInlineKeyboard,
   candidateAddReject
-} = require('./inline-keyboards');
+} = require('./keyboards/inline');
 const config = require('./config');
 
 module.exports = {

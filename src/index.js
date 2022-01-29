@@ -12,9 +12,9 @@ const admin = require('./botEvents/adminBot');
 const message = require('./botEvents/messageBot');
 const callbackQuery = require('./botEvents/callbackQuery/callbackQuery');
 
-start(bot); // bot.start event
-uploadPhoto(bot); // bot.photo event
-getNumber(bot); // bot.getNumberOfLiters event
-admin(bot); // bot.admin
-message(bot); // bot.message
+start(bot);
+uploadPhoto(bot);
+getNumber(bot);
+admin(bot);
+message(bot);
 callbackQuery(bot);

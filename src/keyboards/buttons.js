@@ -1,6 +1,4 @@
 module.exports = {
-  YES: 'Додати',
-  NO: 'Відмовити',
   GIVE_OUT_FUEL: 'Видати пальне',
   TOTAL_FUEL_BALANCE: 'Залишок пального',
   MY_CARS: 'Закріплені за мною автомобілі',
