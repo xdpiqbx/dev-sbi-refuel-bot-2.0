@@ -2,6 +2,12 @@ const TelegramBot = require('node-telegram-bot-api');
 const config = require('../config');
 
 class Bot {
+  allowableEmmitersNames = {
+    start: /\/start/,
+    admin: /\/admin/,
+    number: /^\d{1,3}$/
+  };
+
   constructor() {
     this.bot = new TelegramBot(config.TOKEN, {
       polling: true
@@ -9,11 +15,15 @@ class Bot {
   }
 
   start(callback) {
-    this.bot.onText(/\/start/, callback);
+    this.bot.onText(this.allowableEmmitersNames.start, callback);
   }
 
   admin(callback) {
-    this.bot.onText(/\/admin/, callback);
+    this.bot.onText(this.allowableEmmitersNames.admin, callback);
+  }
+
+  getNumberOfLiters(callback) {
+    this.bot.onText(this.allowableEmmitersNames.number, callback);
   }
 
   message(callback) {
@@ -22,10 +32,6 @@ class Bot {
 
   callbackQuery(callback) {
     this.bot.on('callback_query', callback);
-  }
-
-  getNumberOfLiters(callback) {
-    this.bot.onText(/^\d{1,3}$/, callback);
   }
 
   photo(callback) {

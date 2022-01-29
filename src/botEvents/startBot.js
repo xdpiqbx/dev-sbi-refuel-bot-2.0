@@ -1,6 +1,9 @@
 const botMessages = require('../botMessages');
 const { getAllCarsModelNumber } = require('../db/car-db-queries');
-const { getDriverIdByChatId } = require('../db/driver-db-queries');
+const {
+  getDriverIdByChatId,
+  resetTempDataInDriver
+} = require('../db/driver-db-queries');
 const { newVisitor } = require('../library/userLib');
 const ACTION = require('../inline-keyboard-actions');
 
@@ -16,6 +19,7 @@ const start = bot => {
           msg.from.username
         );
       } else {
+        await resetTempDataInDriver(driver._id);
         const cars = await getAllCarsModelNumber();
         botMessages.startDialog(
           bot.sendMessage.bind(bot),

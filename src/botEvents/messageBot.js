@@ -47,6 +47,18 @@ const message = bot => {
       case KB_BTNS.MY_CARS: // Done
         myCars(bot.sendMessage.bind(bot), chatId);
         break;
+      default:
+        const keysCount = Object.keys(bot.allowableEmmitersNames).length;
+        let nullCount = 0;
+        for (const key in bot.allowableEmmitersNames) {
+          if (!Array.isArray(msg.text.match(bot.allowableEmmitersNames[key]))) {
+            nullCount += 1;
+          }
+        }
+        if (keysCount === nullCount) {
+          console.log('Не зрозумів');
+        }
+        break;
     }
   });
 };

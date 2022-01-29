@@ -268,7 +268,7 @@ module.exports = {
       `Заправлено на: <b>${litres}</b> літрів`
     ];
     if (status < 2) {
-      message.push(`Залишилось талонами: <b>${resLitres}</b> літрів`);
+      message.push(`Залишиться талонами: <b>${resLitres}</b> літрів`);
     }
     message.push('\nЗбережено &#x1F4BE\n');
     message.push('&#x203C <b>Додайте якісне фото чека</b> &#x1F4F7');
