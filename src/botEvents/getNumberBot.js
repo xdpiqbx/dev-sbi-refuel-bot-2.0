@@ -7,7 +7,8 @@ const {
   getTempCarId,
   setTempLitres,
   getDriverStatusByChatId,
-  getGiveOutOrRefuel
+  getGiveOutOrRefuel,
+  resetTempDataInDriver
 } = require('../db/driver-db-queries');
 
 const getNumber = bot => {
@@ -27,7 +28,9 @@ const getNumber = bot => {
         if (giveOutOrRefuel) {
           // give out talon
           resLitres = car.gasoline_residue + litres;
-          await setCarGasolineResidue(car._id, resLitres);
+          await setCarGasolineResidue(car._id, resLitres).then(() => {
+            resetTempDataInDriver(carId._id);
+          });
         } else {
           // refuel
           resLitres = car.gasoline_residue - litres;

@@ -16,7 +16,7 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   mainAdminKeyboard: (sendMessage, chatId, driverStatus) => {
     const message = `Оберіть опцію`;
@@ -37,7 +37,7 @@ module.exports = {
         resize_keyboard: true
       }
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   messageForNewVisitor: (sendMessage, candidate) => {
     const message = [
@@ -48,7 +48,7 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(candidate.tlg_chatId, message, options);
+    return sendMessage(candidate.tlg_chatId, message, options);
   },
   reportForCreatorAboutNewUser: (sendMessage, candidate, action) => {
     const message = [
@@ -60,7 +60,7 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(config.CREATOR_CHAT_ID, message, options).then(() => {
+    return sendMessage(config.CREATOR_CHAT_ID, message, options).then(() => {
       sendMessage(config.CREATOR_CHAT_ID, `Добавить?`, {
         reply_markup: {
           inline_keyboard: candidateAddReject(candidate.tlg_chatId, action)
@@ -85,7 +85,7 @@ module.exports = {
         )
       }
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   getListOfYearsInline: (sendMessage, chatId, years, carForStat, action) => {
     const { model, number } = carForStat;
@@ -95,7 +95,7 @@ module.exports = {
         inline_keyboard: yearsToInlineKeyboard(years, action)
       }
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   getListOfMonthesInline: (
     sendMessage,
@@ -112,12 +112,12 @@ module.exports = {
         inline_keyboard: monthsesToInlineKeyboard(monthses, year, action)
       }
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   newUserRejected: (sendMessage, chatId) => {
     const message = `<b>У доступі відмовлено.</b>`;
     const options = { parse_mode: 'HTML' };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   carsAssignedToDriver: (sendMessage, chatId, { name, carsIds }) => {
     const driverStat = [
@@ -140,7 +140,7 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   giveOutGasoline: (sendMessage, chatId, cars, action) => {
     const message = [
@@ -151,7 +151,7 @@ module.exports = {
       parse_mode: 'HTML'
     };
 
-    sendMessage(chatId, message, options).then(() => {
+    return sendMessage(chatId, message, options).then(() => {
       sendMessage(chatId, `На яке авто видати пальне?`, {
         reply_markup: {
           inline_keyboard: carsToInlineKeyboard(cars, action)
@@ -170,7 +170,7 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   totalFuelBalance: (sendMessage, chatId, cars) => {
     const message = cars
@@ -185,7 +185,7 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   inlineKbdListOfCars: (sendMessage, chatId, cars, action) => {
     const message = `Оберіть авто`;
@@ -194,7 +194,7 @@ module.exports = {
         inline_keyboard: carsToInlineKeyboard(cars, action)
       }
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   inlineKbdListOfDrivers: (sendMessage, chatId, drivers, action) => {
     const message = `Оберіть водія`;
@@ -203,12 +203,21 @@ module.exports = {
         inline_keyboard: driversToInlineKeyboard(drivers, action)
       }
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   offerToPressStart: (sendMessage, chatId) => {
-    sendMessage(chatId, `Для початку тисніть -> \/start`, {
+    return sendMessage(chatId, `Для початку тисніть -> \/start`, {
       parse_mode: 'HTML'
     });
+  },
+  dontUnderstand: (sendMessage, chatId) => {
+    return sendMessage(
+      chatId,
+      `Нажаль я вас не розумію. Виконуйте дії послідовно.`,
+      {
+        parse_mode: 'HTML'
+      }
+    );
   },
   startDialog: (sendMessage, chatId, cars, action) => {
     const message = [
@@ -219,7 +228,7 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(chatId, message, options)
+    return sendMessage(chatId, message, options)
       .then(() => {
         sendMessage(chatId, `Яке авто заправляємо?`, {
           reply_markup: {
@@ -237,6 +246,17 @@ module.exports = {
         });
       });
   },
+  helpMessage: (sendMessage, chatId) => {
+    const message = [
+      `<b>1.</b> Обрати авто зі списку;`,
+      `<b>2.</b> Вказати на скільки літрів заправляємо;`,
+      `<b>3.</b> Додати фото чека.`
+    ].join('\n');
+    const options = {
+      parse_mode: 'HTML'
+    };
+    return sendMessage(chatId, message, options);
+  },
   howMuchDoWeFill: (sendMessage, chatId, car, status) => {
     const { model, number, gasoline_residue } = car;
     const message = [
@@ -251,7 +271,7 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(chatId, message.join('\n'), options);
+    return sendMessage(chatId, message.join('\n'), options);
   },
   refuelReportAndAskForCheck: (
     sendMessage,
@@ -277,7 +297,7 @@ module.exports = {
       parse_mode: 'HTML'
     };
 
-    sendMessage(chatId, message.join('\n'), options);
+    return sendMessage(chatId, message.join('\n'), options);
   },
   giveOutReport: (sendMessage, chatId, car, resLitres, litres, status) => {
     const message = [
@@ -292,7 +312,7 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(chatId, message.join('\n'), options);
+    return sendMessage(chatId, message.join('\n'), options);
   },
   reportDriverChatIdIsAddedToDb: (
     sendMessage,
@@ -305,7 +325,7 @@ module.exports = {
       `Водій: ${driverName}`,
       `Ідентифікатор водія: ${candidateChatId}`
     ].join('\n');
-    sendMessage(creatorChatId, messageToCreator, {
+    return sendMessage(creatorChatId, messageToCreator, {
       parse_mode: 'HTML'
     }).then(() => {
       sendMessage(
@@ -325,7 +345,7 @@ module.exports = {
     const m1 = `НЕ вдалося додати водія до бази`;
     const m2 = `Вас НЕ вдалося додати до бази. Спробуйте пізніше`;
     const options = { parse_mode: 'HTML' };
-    sendMessage(creatorChatId, m1, options).then(() => {
+    return sendMessage(creatorChatId, m1, options).then(() => {
       sendMessage(candidateChatId, m2, options);
     });
   },
@@ -347,7 +367,7 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   fullInfoAboutDriver: (sendMessage, chatId, driver) => {
     const driverNameStat = [
@@ -369,7 +389,7 @@ module.exports = {
     const options = {
       parse_mode: 'HTML'
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   },
   refuelStatForCarInSpecMonth: (sendMessage, chatId, monthTotalStat) => {
     const { car, monthLabel, data } = monthTotalStat;
@@ -396,6 +416,6 @@ module.exports = {
       parse_mode: 'HTML',
       disable_web_page_preview: true
     };
-    sendMessage(chatId, message, options);
+    return sendMessage(chatId, message, options);
   }
 };

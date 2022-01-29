@@ -56,6 +56,14 @@ const message = bot => {
         }
         if (keysCount === nullCount) {
           console.log('Не зрозумів');
+          botMessages
+            .dontUnderstand(bot.sendMessage.bind(bot), chatId)
+            .then(() => {
+              botMessages.helpMessage(bot.sendMessage.bind(bot), chatId);
+            })
+            .then(() => {
+              botMessages.offerToPressStart(bot.sendMessage.bind(bot), chatId);
+            });
         }
         break;
     }
