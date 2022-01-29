@@ -1,8 +1,10 @@
 const botMessages = require('../botMessages');
+
 const {
   getAllCarsModelNumber,
   getAllCarsModelNumberGas
 } = require('../db/car-db-queries');
+
 const {
   getDriverStatusByChatId,
   getAllDriversByAlphabet,
@@ -10,6 +12,7 @@ const {
   getDriverByIdWithCars,
   setGiveOutOrRefuel
 } = require('../db/driver-db-queries');
+
 const KB_BTNS = require('../keyboard-buttons');
 const ACTION = require('../inline-keyboard-actions');
 
@@ -47,23 +50,29 @@ const message = bot => {
         myCars(bot.sendMessage.bind(bot), chatId);
         break;
       default:
-        const keysCount = Object.keys(bot.allowableEmmitersNames).length;
-        let nullCount = 0;
-        for (const key in bot.allowableEmmitersNames) {
-          if (!Array.isArray(msg.text.match(bot.allowableEmmitersNames[key]))) {
-            nullCount += 1;
+        if (msg.text) {
+          const keysCount = Object.keys(bot.allowableEmmitersNames).length;
+          let nullCount = 0;
+          for (const key in bot.allowableEmmitersNames) {
+            if (
+              !Array.isArray(msg.text.match(bot.allowableEmmitersNames[key]))
+            ) {
+              nullCount += 1;
+            }
           }
-        }
-        if (keysCount === nullCount) {
-          console.log('Не зрозумів');
-          botMessages
-            .dontUnderstand(bot.sendMessage.bind(bot), chatId)
-            .then(() => {
-              botMessages.helpMessage(bot.sendMessage.bind(bot), chatId);
-            })
-            .then(() => {
-              botMessages.offerToPressStart(bot.sendMessage.bind(bot), chatId);
-            });
+          if (keysCount === nullCount) {
+            botMessages
+              .dontUnderstand(bot.sendMessage.bind(bot), chatId)
+              .then(() => {
+                botMessages.helpMessage(bot.sendMessage.bind(bot), chatId);
+              })
+              .then(() => {
+                botMessages.offerToPressStart(
+                  bot.sendMessage.bind(bot),
+                  chatId
+                );
+              });
+          }
         }
         break;
     }

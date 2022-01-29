@@ -2,8 +2,10 @@ const axios = require('axios');
 const cloudinary = require('cloudinary').v2;
 const config = require('../config');
 
+const botMessages = require('../botMessages');
+
 const {
-  getTmpCarIdTmpLitresDrvStatus,
+  getTmpCarIdTmpLitrStatusRefuel,
   resetTempDataInDriver
 } = require('../db/driver-db-queries');
 
@@ -19,14 +21,25 @@ const botPhotos = require('../botPhotos');
 const uploadPhoto = bot => {
   bot.photo(async msg => {
     try {
-      const { file_id, file_unique_id } = msg.photo[3];
+      const len = msg.photo.length;
+      const arrIndex = len > 3 ? 3 : len - 1;
+      const { file_id, file_unique_id } = msg.photo[arrIndex];
 
       const {
         temp_carId,
         temp_litres,
         status,
+        giveOutOrRefuel,
         _id: driverId
-      } = await getTmpCarIdTmpLitresDrvStatus(msg.chat.id);
+      } = await getTmpCarIdTmpLitrStatusRefuel(msg.chat.id);
+
+      if (!temp_carId || temp_litres === 0 || giveOutOrRefuel) {
+        await resetTempDataInDriver(driverId);
+        return botMessages.offerToPressStart(
+          bot.sendMessage.bind(bot),
+          msg.chat.id
+        );
+      }
 
       const car = await getCarByIdWithoutDriversIds(temp_carId);
 
