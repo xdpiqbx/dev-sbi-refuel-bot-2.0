@@ -32,23 +32,22 @@ const callbackQuery = bot => {
   bot.callbackQuery(async query => {
     const dataFromQuery = JSON.parse(query.data);
     const chatId = query.message.chat.id;
+    const messageId = query.message.message_id;
     const driverStatus = await getDriverStatusByChatId(chatId);
+    const sendMessage = bot.sendMessage.bind(bot);
     switch (dataFromQuery.action) {
       case ACTION.CANDIDATE_YES_NO:
         // Refactored
-        bot.deleteMessage(query.message.chat.id, query.message.message_id);
+        bot.deleteMessage(chatId, messageId);
         const candidateChatId = dataFromQuery.id;
         if (!dataFromQuery.val) {
           // candidatRejected(dataFromQuery.id);
-          botMessages.newUserRejected(
-            bot.sendMessage.bind(bot),
-            candidateChatId
-          );
+          botMessages.newUserRejected(sendMessage, candidateChatId);
         } else {
           // addDriverToDb(chatId, dataFromQuery.id);
           const driversWithoutChatId = await getAllDriversWithoutChatId();
           botMessages.addOrNotNewUserToDb(
-            bot.sendMessage.bind(bot),
+            sendMessage,
             chatId,
             candidateChatId,
             driversWithoutChatId,
@@ -64,9 +63,9 @@ const callbackQuery = bot => {
           );
           await setGiveOutOrRefuel(chatId, false); // giveOutOrRefuel = false;
           await setTempCarIdForDriver(chatId, carForRefuel._id);
-          bot.deleteMessage(query.message.chat.id, query.message.message_id);
+          bot.deleteMessage(chatId, messageId);
           botMessages.howMuchDoWeFill(
-            bot.sendMessage.bind(bot),
+            sendMessage,
             chatId,
             carForRefuel,
             driverStatus.status
@@ -81,9 +80,9 @@ const callbackQuery = bot => {
           dataFromQuery.id
         );
         await setTempCarIdForDriver(chatId, carForGiveOut._id);
-        bot.deleteMessage(query.message.chat.id, query.message.message_id);
+        bot.deleteMessage(chatId, messageId);
         botMessages.autoIsSelectedForGiveOutGasoline(
-          bot.sendMessage.bind(bot),
+          sendMessage,
           chatId,
           carForGiveOut
         );
@@ -94,13 +93,13 @@ const callbackQuery = bot => {
           dataFromQuery._id,
           dataFromQuery.id //candidateChatId
         );
-        bot.deleteMessage(query.message.chat.id, query.message.message_id);
+        bot.deleteMessage(chatId, messageId);
         if (acknowledged && modifiedCount === 1) {
           const driver = new Driver(
             await getDriverByIdWithoutCars(dataFromQuery._id)
           );
           botMessages.reportDriverChatIdIsAddedToDb(
-            bot.sendMessage.bind(bot),
+            sendMessage,
             config.CREATOR_CHAT_ID,
             dataFromQuery.id,
             driver.name
@@ -108,7 +107,7 @@ const callbackQuery = bot => {
         } else {
           // Ошибка Mongo_DB
           botMessages.failedToAddChatIdToDb(
-            bot.sendMessage.bind(bot),
+            sendMessage,
             config.CREATOR_CHAT_ID,
             dataFromQuery.id //candidateChatId
           );
@@ -116,9 +115,9 @@ const callbackQuery = bot => {
         break;
       case ACTION.INFO_ABOUT_CAR:
         const car = await getInfoAboutCarWithDriversNames(dataFromQuery.id);
-        bot.deleteMessage(query.message.chat.id, query.message.message_id);
+        bot.deleteMessage(chatId, messageId);
         botMessages.fullInfoAboutCar(
-          bot.sendMessage.bind(bot),
+          sendMessage,
           chatId,
           car,
           driverStatus.status
@@ -126,21 +125,17 @@ const callbackQuery = bot => {
         break;
       case ACTION.INFO_ABOUT_DRIVER:
         const driver = await getDriverByIdWithCars(dataFromQuery.id);
-        bot.deleteMessage(query.message.chat.id, query.message.message_id);
-        botMessages.fullInfoAboutDriver(
-          bot.sendMessage.bind(bot),
-          chatId,
-          driver
-        );
+        bot.deleteMessage(chatId, messageId);
+        botMessages.fullInfoAboutDriver(sendMessage, chatId, driver);
         break;
       case ACTION.CAR_STATISTIC:
         await setTempCarIdForDriver(chatId, dataFromQuery.id);
         const carForStat = await getCarByIdWithoutDriversIds(dataFromQuery.id);
 
         const years = [2021, 2022];
-        bot.deleteMessage(query.message.chat.id, query.message.message_id);
+        bot.deleteMessage(chatId, messageId);
         botMessages.getListOfYearsInline(
-          bot.sendMessage.bind(bot),
+          sendMessage,
           chatId,
           years,
           carForStat,
@@ -176,10 +171,10 @@ const callbackQuery = bot => {
         const allUnicMonthses = unicMonthsesNums.map(monNum => {
           return allMonthses.find(m => m.month === monNum);
         });
-        bot.deleteMessage(query.message.chat.id, query.message.message_id);
+        bot.deleteMessage(chatId, messageId);
         // вывести inline месяца в которых заправлялась машина
         botMessages.getListOfMonthesInline(
-          bot.sendMessage.bind(bot),
+          sendMessage,
           chatId,
           allUnicMonthses,
           dataFromQuery.year,
@@ -231,10 +226,10 @@ const callbackQuery = bot => {
           monthLabel: format(resultArr[0].date, 'LLLL', { locale: uk }),
           data: resultArr
         };
-        bot.deleteMessage(query.message.chat.id, query.message.message_id);
+        bot.deleteMessage(chatId, messageId);
         await setTempCarIdForDriver(chatId, null);
         botMessages.refuelStatForCarInSpecMonth(
-          bot.sendMessage.bind(bot),
+          sendMessage,
           chatId,
           monthTotalStat
         );
