@@ -10,7 +10,6 @@ const {
   getDriverByIdWithCars,
   setGiveOutOrRefuel
 } = require('../db/driver-db-queries');
-const { sortStringsFromObj } = require('../helper');
 const KB_BTNS = require('../keyboard-buttons');
 const ACTION = require('../inline-keyboard-actions');
 
@@ -66,19 +65,16 @@ const message = bot => {
 const giveOutFuel = async (sendMessage, chatId) => {
   const cars = await getAllCarsModelNumber();
   await setGiveOutOrRefuel(chatId, true);
-  sortStringsFromObj(cars, 'model');
   botMessages.giveOutGasoline(sendMessage, chatId, cars, ACTION.GIVE_OUT_FUEL);
 };
 
 const totalFuelBalance = async (sendMessage, chatId) => {
   const cars = await getAllCarsModelNumberGas();
-  sortStringsFromObj(cars, 'model');
   botMessages.totalFuelBalance(sendMessage, chatId, cars);
 };
 
 const aboutCar = async (sendMessage, chatId) => {
   const cars = await getAllCarsModelNumber();
-  sortStringsFromObj(cars, 'model');
   botMessages.inlineKbdListOfCars(
     sendMessage,
     chatId,
@@ -89,7 +85,6 @@ const aboutCar = async (sendMessage, chatId) => {
 
 const carStatistic = async (sendMessage, chatId) => {
   const cars = await getAllCarsModelNumber();
-  sortStringsFromObj(cars, 'model');
   botMessages.inlineKbdListOfCars(
     sendMessage,
     chatId,
@@ -114,7 +109,6 @@ const myCars = async (sendMessage, chatId) => {
     botMessages.accessDenied(sendMessage, chatId);
   } else {
     const drv = await getDriverByIdWithCars(driver._id);
-    sortStringsFromObj(drv.carsIds, 'model');
     botMessages.carsAssignedToDriver(sendMessage, chatId, drv);
   }
 };

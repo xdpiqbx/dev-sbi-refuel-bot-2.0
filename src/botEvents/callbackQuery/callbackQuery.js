@@ -1,15 +1,19 @@
 const format = require('date-fns/format');
 const { uk } = require('date-fns/locale');
+
 const config = require('../../config');
 const botMessages = require('../../botMessages');
+
 const {
   getCarByIdWithoutDriversIds,
   getInfoAboutCarWithDriversNames
 } = require('../../db/car-db-queries');
+
 const {
   getChecksByCarId,
   getChecksByCarIdForSpecificMonth
 } = require('../../db/check-db-queries');
+
 const {
   getAllDriversWithoutChatId,
   getDriverByIdWithCars,
@@ -20,8 +24,8 @@ const {
   setGiveOutOrRefuel,
   getTempCarId
 } = require('../../db/driver-db-queries');
+
 const Driver = require('../../entityСlasses/Driver');
-const { sortStringsFromObj } = require('../../helper');
 const ACTION = require('../../inline-keyboard-actions');
 
 const callbackQuery = bot => {
@@ -112,7 +116,6 @@ const callbackQuery = bot => {
         break;
       case ACTION.INFO_ABOUT_CAR:
         const car = await getInfoAboutCarWithDriversNames(dataFromQuery.id);
-        sortStringsFromObj(car.driversIds, 'name');
         bot.deleteMessage(query.message.chat.id, query.message.message_id);
         botMessages.fullInfoAboutCar(
           bot.sendMessage.bind(bot),
@@ -123,7 +126,6 @@ const callbackQuery = bot => {
         break;
       case ACTION.INFO_ABOUT_DRIVER:
         const driver = await getDriverByIdWithCars(dataFromQuery.id);
-        sortStringsFromObj(driver.carsIds, 'model');
         bot.deleteMessage(query.message.chat.id, query.message.message_id);
         botMessages.fullInfoAboutDriver(
           bot.sendMessage.bind(bot),
@@ -132,7 +134,6 @@ const callbackQuery = bot => {
         );
         break;
       case ACTION.CAR_STATISTIC:
-        console.log('ACTION.CAR_STATISTIC');
         await setTempCarIdForDriver(chatId, dataFromQuery.id);
         const carForStat = await getCarByIdWithoutDriversIds(dataFromQuery.id);
 

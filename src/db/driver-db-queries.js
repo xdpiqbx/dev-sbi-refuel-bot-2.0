@@ -18,10 +18,11 @@ module.exports = {
     return await Driver.findById(driverId, 'name tlg_chatId');
   },
   getDriverByIdWithCars: async driverId => {
-    return await Driver.findById(driverId).populate(
-      'carsIds',
-      'model number -_id'
-    );
+    return await Driver.findById(driverId).populate({
+      path: 'carsIds',
+      select: 'model number -_id',
+      options: { sort: { model: 1 } }
+    });
   },
   setTlgChatIdToDriver: async (driverId, tlg_chatId) => {
     return await Driver.updateOne({ _id: driverId }, { $set: { tlg_chatId } });
