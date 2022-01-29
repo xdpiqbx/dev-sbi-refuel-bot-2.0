@@ -12,6 +12,7 @@ module.exports = {
   },
   getInfoAboutCarWithDriversNames: async carId => {
     return await Car.findById(carId).populate('driversIds', 'name -_id');
+    // .sort('name');
   },
   setCarGasolineResidue: async (carId, gasoline_residue) => {
     await Car.updateOne({ _id: carId }, { $set: { gasoline_residue } });

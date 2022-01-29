@@ -12,6 +12,7 @@ class Bot {
     this.bot = new TelegramBot(config.TOKEN, {
       polling: true
     });
+    console.log('Bot has been satarted ....');
   }
 
   start(callback) {
