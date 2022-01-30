@@ -17,7 +17,6 @@ const {
   getAllDriversWithoutChatId,
   getDriverByIdWithCars,
   getDriverByIdWithoutCars,
-  getDriverStatusByChatId,
   setTlgChatIdToDriver,
   setTempCarIdForDriver,
   setGiveOutOrRefuel,
@@ -25,10 +24,6 @@ const {
 } = require('../../db/driver-db-queries');
 const Driver = require('../../entityСlasses/Driver');
 
-/*
-TASK:
-  case ACTION.GET_STATS_FOR_MONTH:
-*/
 const actionCases = {
   async candidateYesNo(chatId, dataFromQuery, sendMessage, action) {
     const candidateChatId = dataFromQuery.id;

@@ -1,5 +1,5 @@
 const format = require('date-fns/format');
-const KB_BTNS = require('./keyboards/buttons');
+const keyboard = require('./keyboards/keyboard');
 const {
   driversWithoutChatIdToInlineKeyboard,
   carsToInlineKeyboard,
@@ -21,21 +21,7 @@ module.exports = {
   mainAdminKeyboard: (sendMessage, chatId, driverStatus) => {
     const message = `Оберіть опцію`;
     const options = {
-      reply_markup: {
-        keyboard: [
-          [
-            driverStatus < 2 ? KB_BTNS.TOTAL_FUEL_BALANCE : '',
-            driverStatus === 0 ? KB_BTNS.GIVE_OUT_FUEL : ''
-          ],
-          [
-            driverStatus < 3 ? KB_BTNS.ABOUT_CAR : '',
-            driverStatus < 3 ? KB_BTNS.ABOUT_DRIVER : ''
-          ],
-          [driverStatus < 2 ? KB_BTNS.CAR_REFUEL_STAT : '']
-        ],
-        one_time_keyboard: true,
-        resize_keyboard: true
-      }
+      reply_markup: keyboard.admin(driverStatus)
     };
     return sendMessage(chatId, message, options);
   },
@@ -238,11 +224,7 @@ module.exports = {
       })
       .then(() => {
         sendMessage(chatId, `Чи інші функції ?`, {
-          reply_markup: {
-            keyboard: [[KB_BTNS.MY_CARS]],
-            one_time_keyboard: true,
-            resize_keyboard: true
-          }
+          reply_markup: keyboard.myCars()
         });
       });
   },
