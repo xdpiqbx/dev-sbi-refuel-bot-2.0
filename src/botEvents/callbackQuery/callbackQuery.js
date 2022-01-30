@@ -1,7 +1,6 @@
 const format = require('date-fns/format');
 const { uk } = require('date-fns/locale');
 
-const config = require('../../config');
 const botMessages = require('../../botMessages');
 
 const {
@@ -15,18 +14,14 @@ const {
 } = require('../../db/check-db-queries');
 
 const {
-  getAllDriversWithoutChatId,
   getDriverByIdWithCars,
-  getDriverByIdWithoutCars,
   getDriverStatusByChatId,
-  setTlgChatIdToDriver,
   setTempCarIdForDriver,
-  setGiveOutOrRefuel,
   getTempCarId
 } = require('../../db/driver-db-queries');
 
-const Driver = require('../../entityСlasses/Driver');
 const ACTION = require('../../keyboards/inline-actions');
+const actionCases = require('./actionCases');
 
 const callbackQuery = bot => {
   bot.callbackQuery(async query => {
@@ -37,81 +32,30 @@ const callbackQuery = bot => {
     const sendMessage = bot.sendMessage.bind(bot);
     switch (dataFromQuery.action) {
       case ACTION.CANDIDATE_YES_NO:
-        // Refactored
         bot.deleteMessage(chatId, messageId);
-        const candidateChatId = dataFromQuery.id;
-        if (!dataFromQuery.val) {
-          // candidatRejected(dataFromQuery.id);
-          botMessages.newUserRejected(sendMessage, candidateChatId);
-        } else {
-          // addDriverToDb(chatId, dataFromQuery.id);
-          const driversWithoutChatId = await getAllDriversWithoutChatId();
-          botMessages.addOrNotNewUserToDb(
-            sendMessage,
-            chatId,
-            candidateChatId,
-            driversWithoutChatId,
-            ACTION.ADD_NEW_DRIVER_TO_DB
-          );
-        }
+        actionCases.candidateYesNo(
+          chatId,
+          dataFromQuery,
+          sendMessage,
+          ACTION.ADD_NEW_DRIVER_TO_DB
+        );
         break;
       case ACTION.CARS_FOR_REFUEL:
-        // Refactored
-        try {
-          const carForRefuel = await getCarByIdWithoutDriversIds(
-            dataFromQuery.id
-          );
-          await setGiveOutOrRefuel(chatId, false); // giveOutOrRefuel = false;
-          await setTempCarIdForDriver(chatId, carForRefuel._id);
-          bot.deleteMessage(chatId, messageId);
-          botMessages.howMuchDoWeFill(
-            sendMessage,
-            chatId,
-            carForRefuel,
-            driverStatus.status
-          );
-        } catch (error) {
-          console.log(error);
-        }
+        bot.deleteMessage(chatId, messageId);
+        actionCases.carsForRefuel(
+          chatId,
+          dataFromQuery,
+          sendMessage,
+          driverStatus.status
+        );
         break;
       case ACTION.GIVE_OUT_FUEL:
-        // Rerfactored
-        const carForGiveOut = await getCarByIdWithoutDriversIds(
-          dataFromQuery.id
-        );
-        await setTempCarIdForDriver(chatId, carForGiveOut._id);
         bot.deleteMessage(chatId, messageId);
-        botMessages.autoIsSelectedForGiveOutGasoline(
-          sendMessage,
-          chatId,
-          carForGiveOut
-        );
+        actionCases.giveOutFuel(chatId, dataFromQuery, sendMessage);
         break;
       case ACTION.ADD_NEW_DRIVER_TO_DB:
-        // Rerfactored
-        const { acknowledged, modifiedCount } = await setTlgChatIdToDriver(
-          dataFromQuery._id,
-          dataFromQuery.id //candidateChatId
-        );
         bot.deleteMessage(chatId, messageId);
-        if (acknowledged && modifiedCount === 1) {
-          const driver = new Driver(
-            await getDriverByIdWithoutCars(dataFromQuery._id)
-          );
-          botMessages.reportDriverChatIdIsAddedToDb(
-            sendMessage,
-            config.CREATOR_CHAT_ID,
-            dataFromQuery.id,
-            driver.name
-          );
-        } else {
-          // Ошибка Mongo_DB
-          botMessages.failedToAddChatIdToDb(
-            sendMessage,
-            config.CREATOR_CHAT_ID,
-            dataFromQuery.id //candidateChatId
-          );
-        }
+        actionCases.addNewDriverToDb(chatId, dataFromQuery, sendMessage);
         break;
       case ACTION.INFO_ABOUT_CAR:
         const car = await getInfoAboutCarWithDriversNames(dataFromQuery.id);
