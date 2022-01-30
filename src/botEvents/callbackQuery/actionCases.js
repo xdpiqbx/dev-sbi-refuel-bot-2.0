@@ -96,7 +96,15 @@ const actionCases = {
     } catch (error) {
       console.log(error);
     }
-  }
+  },
+  async infoAboutCar(chatId, dataFromQuery, sendMessage, status) {
+    const car = await getInfoAboutCarWithDriversNames(dataFromQuery.id);
+    botMessages.fullInfoAboutCar(sendMessage, chatId, car, status);
+  },
+  async infoAboutDriver() {},
+  async carStatistic() {},
+  async getListOfyears() {},
+  async getStatsForMonth() {}
 };
 
 module.exports = actionCases;

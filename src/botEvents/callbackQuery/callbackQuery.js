@@ -58,12 +58,11 @@ const callbackQuery = bot => {
         actionCases.addNewDriverToDb(chatId, dataFromQuery, sendMessage);
         break;
       case ACTION.INFO_ABOUT_CAR:
-        const car = await getInfoAboutCarWithDriversNames(dataFromQuery.id);
         bot.deleteMessage(chatId, messageId);
-        botMessages.fullInfoAboutCar(
-          sendMessage,
+        actionCases.infoAboutCar(
           chatId,
-          car,
+          dataFromQuery,
+          sendMessage,
           driverStatus.status
         );
         break;
