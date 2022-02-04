@@ -10,8 +10,6 @@ module.exports = {
     return await Check.find({});
   },
   getChecksByCarId: async (carId, year) => {
-    // делать выборку чеков за последние 3 месяца
-    // return await Check.find({ carId }).select('date litres driverId');
     return await Check.find({
       carId,
       date: {
@@ -21,29 +19,20 @@ module.exports = {
     }).select('date');
   },
   getChecksByCarIdForSpecificMonth: async (carId, month, year) => {
-    const startDate = new Date();
-    const endDate = new Date();
-
-    const firstDay = 1;
-    const utc_offset = Math.abs(endDate.getTimezoneOffset());
-
-    startDate.setHours(0);
-    startDate.setMinutes(utc_offset);
-    startDate.setSeconds(0);
-    startDate.setDate(firstDay);
-    startDate.setMonth(month);
-    startDate.setFullYear(year);
+    const startDate = new Date(year, month, 1);
 
     const lastDay = lastDayOfMonth(startDate).getDate();
+    const endDate = new Date(year, month, lastDay);
+
+    const utc_offset = Math.abs(endDate.getTimezoneOffset());
+
+    startDate.setMinutes(utc_offset);
 
     endDate.setHours(23);
-    endDate.setMinutes(59);
+    endDate.setMinutes(utc_offset);
     endDate.setSeconds(59);
-    endDate.setDate(lastDay);
-    endDate.setMonth(month);
-    endDate.setFullYear(year);
 
-    endDate.setMinutes(endDate.getMinutes() + utc_offset);
+    console.log({ startDate, endDate, utc_offset });
 
     return await Check.find({
       carId,

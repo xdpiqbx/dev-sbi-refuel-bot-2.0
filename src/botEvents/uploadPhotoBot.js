@@ -1,6 +1,7 @@
 const axios = require('axios');
 const cloudinary = require('cloudinary').v2;
 const config = require('../config');
+const { format } = require('date-fns');
 
 const botMessages = require('../botMessages');
 
@@ -96,7 +97,7 @@ const uploadPhoto = bot => {
 const createDate = () => {
   const date = new Date(Date.now());
   const stringDate =
-    date.toLocaleDateString() + '-at-' + date.toLocaleTimeString();
+    format(date, 'dd-MM-yyyy') + '-at-' + date.toLocaleTimeString();
   date.setMinutes(date.getMinutes() + Math.abs(date.getTimezoneOffset()));
   return { date, stringDate };
 };
